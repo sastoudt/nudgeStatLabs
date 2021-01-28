@@ -1,0 +1,441 @@
+---
+title: "Exploring Data"
+author: "Sara Stoudt"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE,message=FALSE}
+library(learnr)
+library(tidyverse)
+library(gradethis)
+library(openintro)
+tutorial_options(
+  # use gradethis for checking
+  exercise.checker = gradethis::grade_learnr
+  )
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Let's Explore
+
+```{r load-data, exercise = T}
+data(arbuthnot)
+```
+
+Let's start to examine the data a little more closely. We can access the data in
+a single column of a data frame separately.
+
+```{r view_boys, exercise = T}
+arbuthnot$boys
+```
+
+This command will only show the number of boys baptized each year. 
+The dollar sign basically says "go to the data frame that comes before me, and find the variable that comes after me".
+
+What command would you use to extract just the counts of girls baptized? Try
+   it!
+   
+```{r viewgirls, exercise = TRUE}
+____$____
+```
+
+```{r viewgirls-solution}
+# solution code
+arbuthnot$girls
+```
+
+```{r viewgirls-check}
+# check code
+gradethis::grade_code()
+```   
+   
+
+Notice that the way R has printed these data is different. When we looked at the complete data frame, we saw 82 rows, one on each line of the display. 
+These data are no longer structured in a table with other variables, so they are displayed  one right after another. 
+Objects that print out in this way are called *vectors*; they represent a set of numbers. 
+R has added numbers in [brackets] along the left side of the printout to indicate locations within the vector. For example, 5218  follows `[1]`, indicating that `5218` is the first entry in the vector. 
+And if `[43]` starts a line, then that would mean the first number on that line would represent the 43rd entry in the vector.
+
+
+## Data visualization
+
+R has some powerful functions for making graphics. We can create a simple plot of the number of girls baptized per year with the command
+
+```{r plot-girls-vs-year, exercise = T}
+ggplot(data = arbuthnot, aes(x = year, y = girls)) + 
+  geom_point()
+```
+
+
+We use the `ggplot()` function to build plots. 
+If you run the plotting code in your console, you should see the plot appear under the *Plots* tab of the lower right panel of RStudio. If you run the chunk, the plot will appear beneath the code chunk.
+Notice that the command above again looks like a function, this time with arguments separated by commas. 
+
+With `ggplot()`:
+
+- The first argument is always the dataset. 
+- Next, you provide the variables from the dataset to be assigned to `aes`thetic elements of the plot, e.g. the x and the y axes. 
+- Finally, you use another layer, separated by a `+` to specify the `geom`etric object for the plot. Since we want to scatterplot, we use `geom_point()`.
+
+For instance, if you wanted to visualize the above plot using a line graph, you would replace `geom_point()` with `geom_line()`.
+
+```{r plot-girls-vs-year-line, exercise = T}
+ggplot(data = arbuthnot, aes(x = year, y = girls)) + 
+  geom_line()
+```
+
+You might wonder how you are supposed to know the syntax for the `ggplot` function. 
+Thankfully, R documents all of its functions extensively. 
+To learn what a function does and its arguments that are available to you, use the "Help" tab in the bottom right.
+
+
+How would you create a plot that would help you answer the following question:
+Is there an apparent trend in the number of boys baptized over the years? 
+
+```{r plotboys, exercise = TRUE}
+ggplot(data = ___, aes(x = ___, y = ___)) + 
+  geom_point()
+```
+
+
+```{r plotboys-solution}
+ggplot(data = arbuthnot, aes(x =year, y = boys)) + 
+  geom_point()
+```
+
+```{r plotboys-check}
+# check code
+gradethis::grade_code()
+```
+
+
+What if you wanted a line instead of points?
+
+```{r plotboyspoint, exercise = TRUE}
+ggplot(data = ___, aes(x = ___, y = ___)) + ___
+```
+
+```{r plotboyspoint-solution}
+ggplot(data = arbuthnot, aes(x = year, y = boys)) + 
+  geom_line()
+```
+
+```{r plotboyspoint-check}
+# check code
+gradethis::grade_code()
+```
+
+
+## R as a big calculator
+
+Now, suppose we want to plot the total number of baptisms. 
+To compute this, we could use the fact that R is really just a big calculator. 
+We can type in mathematical expressions like
+
+```{r calc-total-bapt-numbers, exercise = T}
+5218 + 4683
+```
+
+to see the total number of baptisms in 1629. We could repeat this once for each year, but there is a faster way. 
+If we add the vector for baptisms for boys to that of girls, R will compute all sums simultaneously.
+
+```{r calc-total-bapt-vars, exercise = T}
+arbuthnot$boys + arbuthnot$girls
+```
+
+What you will see are 82 numbers (in that packed display, because we aren’t looking at a data frame here), each one representing the sum we’re after. 
+Take a look at a few of them and verify that they are right.
+
+## Adding a new variable to the data frame
+
+We'll be using this new vector to generate some plots, so we'll want to save it as a permanent column in our data frame.
+
+```{r calc-total-bapt-vars-save, exercise = T}
+arbuthnot <- arbuthnot %>%
+  mutate(total = boys + girls)
+```
+
+The `%>%` operator is called the **piping** operator. It takes the output of the previous expression and pipes it into the first argument of the function in the following one. 
+To continue our analogy with mathematical functions, `x %>% f(y)` is equivalent to `f(x, y)`.
+
+
+**A note on piping:** Note that we can read these two lines of code as the following: *"Take the `arbuthnot` dataset and **pipe** it into the `mutate` function. 
+Mutate the `arbuthnot` data set by creating a new variable called `total` that is the sum of the variables called `boys` and `girls`. 
+
+Then assign the resulting dataset to the object called `arbuthnot`, i.e. overwrite the old `arbuthnot` dataset with the new one containing the new variable."*
+  
+This is equivalent to going through each row and adding up the `boys` and `girls` counts for that year and recording that value in a new column called `total`.
+
+
+**Where is the new variable?** When you make changes to variables in your dataset, click on the name of the dataset again to update it in the data viewer.
+
+  
+You'll see that there is now a new column called `total` that has been tacked onto the data frame.
+
+The special symbol `<-` performs an *assignment*, taking the output of one line of code and saving it into an object in your environment. 
+In this case, you already have an object called `arbuthnot`, so this command updates that data set with the new mutated column.
+
+You can make a line plot of the total number of baptisms per year with the command
+
+```{r plottotalvsyear-setup}
+arbuthnot <- arbuthnot %>%
+  mutate(total = boys + girls)
+```
+
+```{r plottotalvsyear, exercise = TRUE}
+ggplot(data = arbuthnot, aes(x = year, y = total)) + 
+  geom_line()
+```
+
+Just as you computed the total number of births, you can compute the ratio of the number of boys to the number of girls baptized in 1629 with
+
+```{r calc-prop-boys-to-girls-numbers, exercise = T}
+5218 / 4683
+```
+
+or you can act on the complete columns with the expression
+
+```{r calc-prop-boys-to-girls-vars, exercise = T}
+arbuthnot <- arbuthnot %>%
+  mutate(boy_to_girl_ratio = boys / girls)
+```
+
+You can also compute the proportion of newborns that are boys in 1629
+
+```{r calc-prop-boys-numbers, exercise = T}
+5218 / (5218 + 4683)
+```
+
+or you can compute this for all years simultaneously and append it to the dataset
+
+```{r calcpropboysvars-setup}
+arbuthnot <- arbuthnot %>% mutate(total = boys + girls) %>%
+  mutate(boy_ratio = boys / total)
+```
+
+```{r calcpropboysvars, exercise = TRUE}
+arbuthnot <- arbuthnot %>%
+  mutate(boy_ratio = boys / total)
+```
+
+Note that we are using the new `total` variable we created earlier in our calculations.
+
+Generate a line plot of the proportion of boys born over time. What do you see? 
+
+```{r plotboysprop-setup}
+arbuthnot <- arbuthnot %>% mutate(total = boys + girls) %>%
+  mutate(boy_ratio = boys / total)
+```
+
+
+```{r plotboysprop, exercise = TRUE}
+ggplot(data = ___, aes(x = ___, y = ___)) + 
+  geom_line()
+```
+
+```{r plotboysprop-solution}
+ggplot(data = arbuthnot, aes(x =year, y = boy_ratio)) + 
+  geom_line()
+```
+
+```{r plotboysprop-check}
+# check code
+gradethis::grade_code()
+```
+
+
+Finally, in addition to simple mathematical operators like subtraction and division, you can ask R to make comparisons like greater than, `>`, less than, `<`, and equality, `==`. 
+For example, we can ask if the number of births of boys outnumber that of girls in each year with the expression
+
+```{r boys-more-than-girls, exercise = T}
+arbuthnot <- arbuthnot %>%
+  mutate(more_boys = boys > girls)
+```
+
+This command adds a new variable to the `arbuthnot` dataframe containing the values of either `TRUE` if that year had more boys than girls, or `FALSE` if that year did not (the answer may surprise you). 
+This variable contains a different kind of data than we have encountered so far. 
+All other columns in the `arbuthnot` data frame have values that are numerical (the year, the number of boys and girls). 
+Here, we've asked R to create *logical* data, data where the values are either `TRUE` or `FALSE`. 
+In general, data analysis will involve many different kinds of data types, and one reason for using R is that it is able to represent and compute with many of them.
+
+## More Practice
+
+In the previous few exercises, you recreated some of the displays and preliminary analysis of Arbuthnot's baptism data. 
+Your assignment involves repeating these steps, but for present day birth records in the United States. 
+The data are stored in a data frame called `present`. These data come from reports by the Centers for Disease Control. 
+You can learn more about them by bringing up the help file using the command `?present`.
+
+To find the minimum and maximum values of columns, you can use the functions `min` and `max` within a `summarise()` call, which you will learn more about in the following lab. 
+Here's an example of how to find the minimum and maximum amount of boy births in a year for the `arbuthnot` data:
+  
+```{r summarize_min_and_max, exercise = T}
+arbuthnot %>%
+  summarise(min = min(boys), max = max(boys))
+```
+
+What years are included in the `present` data set? 
+
+```{r summarisepresent, exercise = TRUE}
+___ %>%
+  summarise(min = min(___), max = max(___))
+```
+
+```{r summarisepresent-solution}
+present %>%
+  summarise(min = min(year), max = max(year))
+```
+
+```{r summarisepresent-check}
+# check code
+gradethis::grade_code()
+```
+
+
+What are the dimensions of the data frame? 
+
+```{r dimpresent, exercise = TRUE}
+glimpse(___)
+```
+
+```{r dimpresent-solution}
+# solution code
+glimpse(present)
+```
+
+```{r dimpresent-check}
+# check code
+gradethis::grade_code()
+```
+
+What are the variable (column) names?
+
+```{r colnamespresent, exercise = TRUE}
+names(___)
+```
+
+
+```{r colnamespresent-solution}
+names(present)
+```
+
+```{r colnamespresent-check}
+# check code
+gradethis::grade_code()
+```
+
+How do these counts compare to Arbuthnot's? 
+
+```{r comparecounts, exercise = TRUE}
+arbuthnot %>%
+  summarise(min = min(boys), max = max(boys))
+
+___ %>% 
+   summarise(min = min(boys), max = max(boys))
+```
+
+```{r comparecounts-solution}
+arbuthnot %>%
+  summarise(min = min(boys), max = max(boys))
+
+present %>% 
+   summarise(min = min(boys), max = max(boys))
+```
+
+```{r comparecounts-check}
+# check code
+gradethis::grade_code()
+```
+
+
+```{r magnitude}
+question("Are they of a similar magnitude?",
+    answer("Yes"),
+    answer("No, Arbuthnot's are greater."),
+    answer("No, the US's are greater.", correct = T),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+
+Make a plot that displays the proportion of boys born over time.
+
+```{r plotboyspresent, exercise = TRUE}
+present <- present %>% mutate(boy_ratio = ___)
+
+ggplot(data = ___, aes(x = ___, y = ___)) + 
+  geom_line()
+```
+
+
+```{r plotboyspresent-solution}
+present <- present %>% mutate(boy_ratio = boys/(boys+girls))
+
+ggplot(data = present, aes(x = year, y = boy_ratio)) + 
+  geom_line()
+```
+
+```{r plotboyspresent-check}
+# check code
+gradethis::grade_code()
+```
+
+
+
+```{r obs-hold}
+question("Does Arbuthnot's observation about boys being born in greater proportion than girls hold up in the U.S.?",
+    answer("Yes",correct = T),
+    answer("No"),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+
+In what year did we see the most total number of births in the U.S.? *Hint:*
+First calculate the totals and save it as a new variable. Then, sort your
+dataset in descending order based on the total column. We can arrange the data 
+in a descending order with another function: `desc` (for descending order).
+
+```{r mostbirths, exercise = TRUE}
+present <- present %>%
+  mutate(total = ___)
+
+present %>%
+  arrange(desc(total))
+```
+
+
+```{r mostbirths-solution}
+# solution code
+present <- present %>%
+  mutate(total = boys + girls)
+
+present %>%
+  arrange(desc(total))
+```
+
+```{r mostbirths-check}
+# check code
+gradethis::grade_code()
+```
+
+## Submit progress
+
+```{r context="server"}
+learnrhash::encoder_logic(strip_output = T)
+```
+
+```{r encode, echo=FALSE}
+learnrhash::encoder_ui(
+  ui_before = div(strong("Submit your hash in the form below."), br(), br()),
+  ui_after  = learnrhash::iframe_ui(
+    src = "https://docs.google.com/forms/d/e/1FAIpQLSda78rAQWziQ-L6eDanGoDAhcfoi6JU_dg-c-6A9rrEXdvJwg/viewform", ## change link, include name
+    width="900px", height= "1000px"
+  )
+)
+```

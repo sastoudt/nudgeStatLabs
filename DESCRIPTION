@@ -1,0 +1,28 @@
+Package: nudgeRlabs
+Title: learnr tutorials for intro stat
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Sara",
+           family = "Stoudt",
+           role = c("aut", "cre"),
+           email = "sstoudt@smith.edu",
+           comment = c(ORCID = "0000-0002-1693-8058"))
+Description: learnr tutorials for intro stat (based on Open Intro labs)
+License: `use_mit_license()`, `use_gpl3_license()` or friends to
+    pick a license
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Suggests: 
+    learnr
+Imports: 
+    gradethis (>= 0.1.0.9002),
+    openintro (>= 2.0.0),
+    infer (>= 0.5.4)
+Remotes:  
+    rstudio-education/gradethis,
+    OpenIntroStat/openintro,
+    tidymodels/infer
+Depends: 
+    tidyverse
