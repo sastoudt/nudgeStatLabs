@@ -1,0 +1,406 @@
+---
+title: "Inference for numerical data"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE,message=FALSE}
+library(learnr)
+library(learnrhash)
+library(tidyverse)
+library(gradethis)
+library(openintro)
+library(infer)
+tutorial_options(
+  # use gradethis for checking
+  exercise.checker = gradethis::grade_learnr
+  )
+knitr::opts_chunk$set(echo = FALSE)
+
+
+```
+
+## Logistics
+
+This lab will occur remotely and in groups of three. For those of you participating synchronously, you will find the Zoom room information on [Moodle](https://moodle.smith.edu/). I will assign you to a breakout room with your partner(s) from last week. 
+
+For those participating syncronously I will be available in the main Zoom room to answer questions. If you have a question or technical problem, click the "Ask for Help" button (it looks like a question mark) in the meeting controls, and I will be alerted to join your breakout room.  
+
+For those of you participating asynchronously, alert me to technical challengs over Slack DM, and I will get back to you as soon as possible. For questions about the content of the lab, please sign up for an office hour time block. 
+
+Each of you should be writing and running code, examining output, and answering the exercises throughout the lab. However, you only need to turn in one final lab report. To be clear, everyone submits files to Moodle, but the files can be the same within a group. Today one of you should be the main recorder of answers in the lab document. You will share this document with your teammates. As you work it may be helpful to share your screen. Be sure to switch roles from last week so that someone else is the main recorder. It may be helpful to share your screen. 
+
+You all should also feel free to ask and answer questions amongst yourselves via Zoom if participating synchronously or via Slack if participating asynchronously. Please note at the end of the lab document who you consulted for help.
+
+## Getting Started
+
+Along with teaching you how to perform a hypothesis test in R, this lab also has components that will help you as you start your own exploration of a dataset for your final project.
+
+### Load packages
+
+In this lab, we will explore and visualize the data using the **tidyverse** suite of 
+packages, and perform statistical inference using **infer**. The data can be found
+in the companion package for OpenIntro resources, **openintro**.
+
+Let's load the packages.
+
+```{r load-packages, exercise = T}
+library(tidyverse)
+library(openintro)
+library(infer)
+```
+
+
+### The data
+
+Every two years, the Centers for Disease Control and Prevention conduct the Youth
+Risk Behavior Surveillance System (YRBSS) survey, where it takes data from high 
+schoolers (9th through 12th grade), to analyze health patterns. You will work 
+with a selected group of variables from a random sample of observations during 
+one of the years the YRBSS was conducted.
+
+Load the `yrbss` data set into your workspace.
+
+```{r load-data, exercise = T}
+data(yrbss)
+```
+
+There are observations on 13 different variables, some categorical and some 
+numerical. The meaning of each variable can be found by bringing up the help file:
+
+```{r help-nc, exercise = T}
+?yrbss
+```
+
+
+## Exploratory data analysis
+
+
+How many cases are there in our sample? 
+
+```{r snsmuchqveotnuku, exercise = TRUE}
+___(yrbss)
+```
+
+```{r datadim}
+question("How many cases are there in our sample?",
+    answer("13"),
+    answer("1000"),
+    answer("13583", correct = T),
+    answer("100000"),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+You will first start with analyzing the weight of the participants in kilograms:
+`weight`.
+
+```{r irhmoqjmoxknmuup, exercise = TRUE}
+summary(___$___)
+```
+
+```{r irhmoqjmoxknmuup-solution}
+summary(yrbss$weight)
+```
+
+```{r irhmoqjmoxknmuup-check}
+# check code
+gradethis::grade_code()
+```
+
+```{r missingdat}
+question("How many observations are we missing weights from?",
+    answer("77"),
+    answer("104"),
+    answer("273"),
+    answer("1004", correct = T),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+
+Make an appropriate plot of `weight` (given its type). You may want to refer to the ggplot [cheat sheet](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) to remember the types of plots we know how to make.
+
+```{r jixtjgnulpokypqh, exercise = TRUE}
+ggplot(data = ___, aes(x = ___)) + ___
+```
+
+```{r jixtjgnulpokypqh-solution}
+# solution code
+ggplot(data = yrbss, aes(x = weight)) + geom_histogram()
+```
+
+```{r jixtjgnulpokypqh-check}
+# check code
+gradethis::grade_code()
+```
+
+
+```{r skew}
+question("Describe the distribution's symmetry/skewness.",
+    answer("left skewed"),
+    answer("right skewed", correct = T),
+    answer("roughly symmetric"),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+
+Next, consider the possible relationship between a high schooler's weight and their
+physical activity. Plotting the data is a useful first step because it helps 
+us quickly visualize trends, identify strong associations, and develop research
+questions.
+
+First, let's create a new variable `physical_3plus`, which will be coded as either
+"yes" if they are physically active for at least 3 days a week, and "no" if not.
+
+```{r create-new-var, exercise = T}
+yrbss <- yrbss %>% 
+  mutate(physical_3plus = ifelse(yrbss$physically_active_7d > 2, "yes", "no"))
+```
+
+
+Make a side-by-side boxplot of `physical_3plus` and `weight`. You may want to consult [this resource](http://www.sthda.com/english/wiki/ggplot2-box-plot-quick-start-guide-r-software-and-data-visualization) to help you make your plot. 
+
+```{r yqqjwnlhcbgkyhgh-setup}
+yrbss <- yrbss %>% 
+  mutate(physical_3plus = ifelse(yrbss$physically_active_7d > 2, "yes", "no"))
+```
+
+```{r yqqjwnlhcbgkyhgh, exercise = TRUE}
+ggplot(data = ___, aes(x = physical_3plus, y = ___)) + ___
+```
+
+```{r yqqjwnlhcbgkyhgh-solution}
+ggplot(data = yrbss, aes(x = physical_3plus, y = weight)) + geom_boxplot()
+```
+
+```{r yqqjwnlhcbgkyhgh-check}
+# check code
+gradethis::grade_code()
+```
+
+The box plots show how the medians of the two distributions compare, but we can
+also compare the means of the distributions using the following to 
+first group the data by the `physical_3plus` variable, and then calculate the mean
+`weight` in these groups using the `mean` function while ignoring missing values
+by setting the `na.rm` argument to `TRUE`.
+
+```{r by-means-setup}
+yrbss <- yrbss %>% 
+  mutate(physical_3plus = ifelse(yrbss$physically_active_7d > 2, "yes", "no"))
+```
+
+```{r by-means, exercise = TRUE}
+yrbss %>%
+  group_by(physical_3plus) %>%
+  summarise(mean_weight = mean(weight, na.rm = TRUE))
+```
+
+There is an observed difference, but is this difference statistically 
+significant? In order to answer this question we will conduct a hypothesis test.
+
+## Inference
+
+Next, we will introduce a new function, `hypothesize`, that falls into the `infer` 
+workflow. You will use this method for conducting hypothesis tests. 
+
+But first, we need to initialize the test, which we will save as `obs_diff`.
+
+```{r inf-weight-habit-ht-initial-setup}
+yrbss <- yrbss %>% 
+  mutate(physical_3plus = ifelse(yrbss$physically_active_7d > 2, "yes", "no"))
+```
+
+```{r inf-weight-habit-ht-initial, exercise = TRUE}
+obs_diff <- yrbss %>%
+  specify(weight ~ physical_3plus) %>%
+  calculate(stat = "diff in means", order = c("yes", "no"))
+
+obs_diff
+```
+
+Notice how you can use the functions `specify` and `calculate` again like you did
+for calculating confidence intervals. Here, though, the statistic you are searching
+for is the difference in means, with the order being `yes - no != 0`.
+
+After you have initialized the test, you need to simulate the test on the null
+distribution, which we will save as `null`.
+
+```{r inf-weight-habit-ht-null-setup}
+yrbss <- yrbss %>% 
+  mutate(physical_3plus = ifelse(yrbss$physically_active_7d > 2, "yes", "no"))
+
+table(yrbss$physical_3plus)
+```
+
+```{r inf-weight-habit-ht-null, exercise = TRUE}
+yrbss <- yrbss %>% 
+  mutate(physical_3plus = ifelse(yrbss$physically_active_7d > 2, "yes", "no"))
+
+null_dist <- yrbss %>%
+  specify(weight ~ physical_3plus) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "diff in means", order = c("yes", "no"))
+```
+
+Here, `hypothesize` is used to set the null hypothesis as a test for independence.
+In one sample cases, the `null` argument can be set to "point" to test a hypothesis
+relative to a point estimate.
+
+Also, note that the `type` argument within `generate` is set to `permute`, which 
+is the argument when generating a null distribution for a hypothesis test. This will shuffle the labels of "yes" and "no".
+
+We can visualize this null distribution with the following code:
+
+```{r plot-null-setup}
+yrbss <- yrbss %>% 
+  mutate(physical_3plus = ifelse(yrbss$physically_active_7d > 2, "yes", "no"))
+
+null_dist <- yrbss %>%
+  specify(weight ~ physical_3plus) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "diff in means", order = c("yes", "no"))
+```
+
+```{r, plot-null, exercise = TRUE}
+names(null_dist)
+
+ggplot(data = null_dist, aes(x = stat)) +
+  geom_histogram()
+```
+
+
+How many of these `null` permutations have a difference of at least `obs_diff`? 
+
+```{r rnbeaffhhjhcykro-setup}
+yrbss <- yrbss %>% 
+  mutate(physical_3plus = ifelse(yrbss$physically_active_7d > 2, "yes", "no"))
+
+null_dist <- yrbss %>%
+  specify(weight ~ physical_3plus) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "diff in means", order = c("yes", "no"))
+
+obs_diff <- yrbss %>%
+  specify(weight ~ physical_3plus) %>%
+  calculate(stat = "diff in means", order = c("yes", "no"))
+```
+
+
+```{r rnbeaffhhjhcykro, exercise = TRUE}
+___ %>%
+  mutate(big_diff = ifelse(___ > obs_diff$stat, "yes", "no")) 
+
+table(___$___)
+```
+
+
+```{r rnbeaffhhjhcykro-solution}
+null_dist <- null_dist %>%
+  mutate(big_diff = ifelse(stat > obs_diff$stat, "yes", "no"))
+
+table(null_dist$big_diff)
+```
+
+```{r rnbeaffhhjhcykro-check}
+# check code
+gradethis::grade_code()
+```
+
+Now that the test is initialized and the null distribution formed, you can calculate
+the p-value for your hypothesis test using the function `get_p_value`.
+
+```{r inf-weight-habit-ht-pvalue-setup}
+yrbss <- yrbss %>% 
+  mutate(physical_3plus = ifelse(yrbss$physically_active_7d > 2, "yes", "no"))
+
+null_dist <- yrbss %>%
+  specify(weight ~ physical_3plus) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "diff in means", order = c("yes", "no"))
+
+obs_diff <- yrbss %>%
+  specify(weight ~ physical_3plus) %>%
+  calculate(stat = "diff in means", order = c("yes", "no"))
+```
+
+```{r inf-weight-habit-ht-pvalue, exercise = TRUE}
+null_dist %>%
+  get_p_value(obs_stat = obs_diff, direction = "two_sided")
+```
+
+This is the standard workflow for performing hypothesis tests. Make sure you understand how
+the number of the `null` permutations that have a difference of at least `obs_diff` is related to this p-value.
+
+## Submit checkpoint
+
+```{r context="server"}
+learnrhash::encoder_logic(strip_output = T)
+```
+
+```{r encode, echo=FALSE}
+learnrhash::encoder_ui(
+  ui_before = div(strong("Submit your hash in the form below."), br(), br()),
+  ui_after  = learnrhash::iframe_ui(
+    src = "https://docs.google.com/forms/d/e/1FAIpQLSda78rAQWziQ-L6eDanGoDAhcfoi6JU_dg-c-6A9rrEXdvJwg/viewform", ## change link, include name
+    width="900px", height= "1000px"
+  )
+)
+```
+
+## Creating a reproducible lab report
+
+For the rest of this lab you will R Markdown to create a reproducible lab report. 
+In RStudio, go to New File -> R Markdown... Then, choose From Template and then choose `Lab Report` from the list of templates. Make sure to name the document appropriately and pick a location for the file where you know how to find it on your computer.
+
+See the following video describing how to get started with creating these 
+reports for this lab, and all future labs:
+
+[**Basic R Markdown with an OpenIntro Lab**](https://www.youtube.com/watch?v=Pdc368lS2hk)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Pdc368lS2hk" frameborder="0" allowfullscreen></iframe>
+
+**Note: This video was made using `oilabs`. We will NOT be using `oilabs`. Be sure to pick the Lab Report template that goes with `openintro` as shown in screenshot above. Make sure you have `library(openintro)` in your first chunk not `library(oilabs)`.**
+
+## Questions for Lab Report
+
+Answer in an Rmd file based on the lab report template. Remember you will need to load appropriate packages and data.
+
+1. What does a row represent in this data set?
+
+2.  Write the null and alternative hypotheses for testing if the average weights are different for those
+who exercise at least times a week and those who don't. (no code necessary here)
+
+3. Report the statistical results from the hypothesis test done above. (is our result statistically significant at the 0.05 level? what are the implications for our hypotheses?)
+
+4. Come up with a research question evaluating the relationship between height 
+or weight and sleep. Formulate the question in a way that it can be answered using
+a hypothesis test.
+
+## Deliverables
+
+Make sure you have submitted your hash to the Google Form for the first part of the lab.
+
+When you are finished editing your Markdown document click the "Knit" button and choose "Knit to HTML" in the top left corner of RStudio. This will run all of your code and create a formatted document of the output. If you get an error, it means something in your Markdown file isn't right, either an error in code or some error in formatting. Call me into your breakout room, and we will troubleshoot.
+
+Submit your Markdown document and knitted file to [Moodle](https://moodle.smith.edu/) as:
+
+LastName-LastName-LastName-L-06.Rmd  (add a third last name if applicable)
+
+LastName-LastName-LastName-L-06.html
+
+*Due*: Monday (beginning of class time, Eastern time)
+
+* * *
+
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a> and was adapted by Sara Stoudt.
