@@ -1,0 +1,485 @@
+---
+title: "Probability"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE,message=FALSE}
+library(learnr)
+library(learnrhash)
+library(tidyverse)
+library(gradethis)
+library(openintro)
+library(infer)
+tutorial_options(
+  # use gradethis for checking
+  exercise.checker = gradethis::grade_learnr
+  )
+knitr::opts_chunk$set(echo = FALSE)
+
+coin_outcomes <- c("heads", "tails")
+shot_outcomes <- c("H", "M")
+
+```
+
+## Logistics
+
+This lab will occur remotely and in groups of three. For those of you participating synchronously, you will find the Zoom room information on [Moodle](https://moodle.smith.edu/). I will assign you to a breakout room with your partner(s) from last week. 
+
+For those participating syncronously I will be available in the main Zoom room to answer questions. If you have a question or technical problem, click the "Ask for Help" button (it looks like a question mark) in the meeting controls, and I will be alerted to join your breakout room.  
+
+For those of you participating asynchronously, alert me to technical challengs over Slack DM, and I will get back to you as soon as possible. For questions about the content of the lab, please sign up for an office hour time block. 
+
+Each of you should be writing and running code, examining output, and answering the exercises throughout the lab. However, you only need to turn in one final lab report. To be clear, everyone submits files to Moodle, but the files can be the same within a group. Today one of you should be the main recorder of answers in the lab document. You will share this document with your teammates. As you work it may be helpful to share your screen. Be sure to switch roles from last week so that someone else is the main recorder. It may be helpful to share your screen. 
+
+You all should also feel free to ask and answer questions amongst yourselves via Zoom if participating synchronously or via Slack if participating asynchronously. Please note at the end of the lab document who you consulted for help.
+
+## Getting Started
+
+### Load packages
+
+In this lab, we will explore and visualize the data using the `tidyverse` suite of 
+packages. The data can be found in the companion package for OpenIntro labs, **openintro**.
+
+Let's load the packages.
+
+```{r load-packages, exercise = T}
+library(tidyverse)
+library(openintro)
+```
+
+
+### Data
+
+Basketball players who make several baskets in succession are described as 
+having a *hot hand*. Fans and players have long believed in the hot hand 
+phenomenon, which refutes the assumption that each shot is independent of the 
+next. However, [a 1985 paper](http://www.sciencedirect.com/science/article/pii/0010028585900106) by Gilovich, Vallone, and Tversky collected evidence
+that contradicted this belief and showed that successive shots are independent 
+events. This paper started a great controversy that continues to this day, as you can 
+see by Googling *hot hand basketball*.
+
+More examples:
+
+- [Golden State Warriors and the Hot Hand](https://link.springer.com/content/pdf/10.1007/s00283-018-9825-3.pdf)
+
+- [Hot Hand in Baseball](http://cdar.berkeley.edu/wp-content/uploads/2020/03/Hot-or-Not.pdf)
+
+We do not expect to resolve this controversy today. However, in this lab we'll 
+apply one approach to answering questions like this. The goals for this lab are 
+to (1) think about the effects of independent and dependent events, (2) learn 
+how to simulate shooting streaks in R, and (3) to compare a simulation to actual
+data in order to determine if the hot hand phenomenon appears to be real.
+
+
+CW: death, plane crash
+
+Your investigation will focus on the performance of one player: [Kobe Bryant](https://en.wikipedia.org/wiki/Kobe_Bryant) formally of the Los Angeles Lakers before his tragic death in a plane crash. His performance against the Orlando Magic in the [2009 NBA Finals](https://en.wikipedia.org/wiki/2009_NBA_Finals) earned him the title *Most Valuable Player* and many spectators commented on how he appeared to show a hot hand. The data file we'll use is called `kobe_basket`.
+
+```{r glimpse-data, exercise = T}
+glimpse(kobe_basket)
+```
+
+This data frame contains 133 observations and 6 variables, where every
+row records a shot taken by Kobe Bryant. The `shot` variable in this dataset
+indicates whether the shot was a hit (`H`) or a miss (`M`).
+
+## Looking for streaks
+
+Just looking at the string of hits and misses, it can be difficult to gauge 
+whether or not it seems like Kobe was shooting with a hot hand. One way we can 
+approach this is by considering the belief that hot hand shooters tend to go on 
+shooting streaks. For this lab, we define the length of a shooting streak to be 
+the *number of consecutive baskets made until a miss occurs*.
+
+For example, in Game 1 Kobe had the following sequence of hits and misses from 
+his nine shot attempts in the first quarter:
+
+\[ \textrm{H M | M | H H M | M | M | M} \]
+
+You can verify this by viewing the first 9 rows of the data in the data viewer.
+
+Within the nine shot attempts, there are six streaks, which are separated by a 
+"|" above. Their lengths are one, zero, two, zero, zero, zero (in order of 
+occurrence).
+
+Counting streak lengths manually for all 133 shots would get tedious, so we'll
+use the custom function `calc_streak` to calculate them, and store the results
+in a data frame called `kobe_streak` as the `length` variable.
+
+```{r calc-streak-kobe, exercise = T}
+kobe_streak <- calc_streak(kobe_basket$shot)
+
+head(kobe_streak)
+```
+
+We can then take a look at the distribution of these streak lengths.
+
+```{r plot-streak-kobe-setup}
+kobe_streak <- calc_streak(kobe_basket$shot)
+
+```
+
+```{r plot-streak-kobe, exercise = TRUE}
+ggplot(data = kobe_streak, aes(x = length)) +
+  geom_bar() + ylim(0,50) + xlim(-1,7) 
+## these xlim and ylims help us keep the scales the same to make comparison between bar plots easier
+```
+
+```{r maxstreak}
+question("What was Kobe's typical streak length (or mode)?",
+    answer("0", correct = T),
+    answer("1"),
+    answer("2"),
+    answer("3"),
+    answer("4"),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+```{r typicalstreak}
+question("How long was his longest streak of baskets (or maximum)?",
+  answer("0"),
+    answer("1"),
+    answer("2"),
+    answer("3"),
+    answer("4", correct = T),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+
+
+## [Compared to what?](https://youtu.be/VF9-sEbqDvU?t=162)
+
+We've shown that Kobe had some long shooting streaks, but are they long enough 
+to support the belief that he had a hot hand? What can we compare them to?
+
+To answer these questions, let's return to the idea of *independence*. Two 
+processes are independent if the outcome of one process doesn't effect the outcome 
+of the second. If each shot that a player takes is an independent process, 
+having made or missed your first shot will not affect the probability that you
+will make or miss your second shot.
+
+A shooter with a hot hand will have shots that are *not* independent of one 
+another. Specifically, if the shooter makes his first shot, the hot hand model 
+says he will have a *higher* probability of making his second shot.
+
+Let's suppose for a moment that the hot hand model is valid for Kobe. During his
+career, the percentage of time Kobe makes a basket (i.e. his shooting 
+percentage) is about 45%, or in probability notation,
+
+\[ P(\textrm{shot 1 = H}) = 0.45 \]
+
+If he makes the first shot and has a hot hand (*not* independent shots), then 
+the probability that he makes his second shot would go up to, let's say, 60%,
+
+\[ P(\textrm{shot 2 = H} \, | \, \textrm{shot 1 = H}) = 0.60 \]
+
+As a result of these increased probabilites, you'd expect Kobe to have longer 
+streaks. Compare this to the skeptical perspective where Kobe does *not* have a
+hot hand, where each shot is independent of the next. If he hit his first shot,
+the probability that he makes the second is still 0.45.
+
+\[ P(\textrm{shot 2 = H} \, | \, \textrm{shot 1 = H}) = 0.45 \]
+
+In other words, making the first shot did nothing to effect the probability that
+he'd make his second shot. If Kobe's shots are independent, then he'd have the 
+same probability of hitting every shot regardless of his past shots: 45%.
+
+Now that we've phrased the situation in terms of independent shots, let's return
+to the question: how do we tell if Kobe's shooting streaks are long enough to 
+indicate that he has a hot hand? We can compare his streak lengths to someone
+without a hot hand: an independent shooter. 
+
+## Simulations in R
+
+While we don't have any data from a shooter we know to have independent shots, 
+that sort of data is very easy to simulate in R. In a simulation, you set the 
+ground rules of a random process and then the computer uses random numbers to 
+generate an outcome that adheres to those rules. As a simple example, you can
+simulate flipping a fair coin with the following.
+
+```{r head-tail, exercise = T}
+coin_outcomes <- c("heads", "tails")
+sample(coin_outcomes, size = 1, replace = TRUE)
+```
+
+The vector `coin_outcomes` can be thought of as a hat with two slips of paper in it: 
+one slip says `heads` and the other says `tails`. The function `sample` draws 
+one slip from the hat and tells us if it was a head or a tail. Note `sample` (with argument `size`) works on a vector while `slice_sample` (with argument `n`) works on a data frame.
+
+Run the second command listed above several times. Just like when flipping a 
+coin, sometimes you'll get a heads, sometimes you'll get a tails, but *in the 
+long run*, you'd expect to get roughly equal numbers of each.
+
+If you wanted to simulate flipping a fair coin 100 times, you could either run 
+the function 100 times or, more simply, adjust the `size` argument, which 
+governs how many samples to draw (the `replace = TRUE` argument indicates we put
+the slip of paper back in the hat before drawing again). Save the resulting 
+vector of heads and tails in a new object called `sim_fair_coin`.
+
+```{r sim-fair-coin, exercise = T}
+sim_fair_coin <- sample(coin_outcomes, size = 100, replace = TRUE)
+```
+
+To view the results of this simulation, type the name of the object and then use
+`table` to count up the number of heads and tails.
+
+```{r table-sim-fair-coin-setup}
+sim_fair_coin <- sample(coin_outcomes, size = 100, replace = TRUE)
+```
+
+```{r table-sim-fair-coin, exercise = TRUE}
+sim_fair_coin
+table(sim_fair_coin)
+```
+
+Since there are only two elements in `coin_outcomes`, the probability that we "flip" 
+a coin and it lands heads is 0.5. Say we're trying to simulate an unfair coin 
+that we know only lands heads 20% of the time. We can adjust for this by adding 
+an argument called `prob`, which provides a vector of two probability weights.
+
+```{r sim-unfair-coin, exercise = T}
+sim_unfair_coin <- sample(coin_outcomes, size = 100, replace = TRUE, 
+                          prob = c(0.2, 0.8))
+```
+
+`prob=c(0.2, 0.8)` indicates that for the two elements in the `outcomes` vector,
+we want to select the first one, `heads`, with probability 0.2 and the second 
+one, `tails` with probability 0.8. In previous examples we have actually genreated the outcome space and sampled directly from it rather than specifying probabilities (like we have a bag of 10 chips, where 2 chips are labeled 
+"head" and 8 chips "tail"). In either approach, at each draw, the probability of drawing a 
+chip that says "head"" is 20%, and "tail" is 80%.
+
+Another way to think about it is that we've shrunken the size of the slip of paper that says "heads", 
+making it less likely to be drawn, and we've increased the size of the slip of 
+paper saying "tails", making it more likely to be drawn. When you simulated the 
+fair coin, both slips of paper were the same size. This happens by default if 
+you don't provide a `prob` argument; all elements in the `outcomes` vector have 
+an equal probability of being drawn.
+
+If you want to learn more about `sample` or any other function, recall that you 
+can always check out its help file.
+
+In your simulation of flipping the unfair coin 100 times, how many flips 
+    came up heads?
+    
+```{r umttjrtwhfgnldyz-setup}
+set.seed(129149)
+sim_unfair_coin <- sample(coin_outcomes, size = 100, replace = TRUE, 
+                          prob = c(0.2, 0.8))
+```
+
+```{r umttjrtwhfgnldyz, exercise = TRUE}
+table(___)
+```
+
+```{r umttjrtwhfgnldyz-solution}
+table(sim_unfair_coin)
+```
+
+```{r umttjrtwhfgnldyz-check}
+# check code
+gradethis::grade_code()
+```
+    
+
+## Simulating the Independent Shooter
+
+Simulating a basketball player who has independent shots uses the same mechanism 
+that you used to simulate a coin flip. To simulate a single shot from an 
+independent shooter with a shooting percentage of 50% you can type
+
+```{r sim-basket, exercise = T}
+shot_outcomes <- c("H", "M")
+sim_basket <- sample(shot_outcomes, size = 1, replace = TRUE)
+```
+
+To make a valid comparison between Kobe and your simulated independent shooter, 
+you need to align both their shooting percentage and the number of attempted shots.
+
+
+How can we sample 133 shots reflecting a shooting percentage of 45%? 
+
+```{r ihnlvvbzmksklpev, exercise = TRUE}
+sim_basket <- sample(shot_outcomes, size = ___, prob = c(___, ___), replace = TRUE)
+```
+
+```{r ihnlvvbzmksklpev-solution}
+sim_basket <- sample(shot_outcomes, size = 133, prob = c(0.45, 0.55), replace = TRUE)
+```
+
+```{r ihnlvvbzmksklpev-check}
+# check code
+gradethis::grade_code()
+```
+
+
+Note that we've named the new vector `sim_basket`, the same name that we gave to
+the previous vector reflecting a shooting percentage of 50%. In this situation, 
+R overwrites the old object with the new one, so always make sure that you don't
+need the information in an old vector before reassigning its name.
+
+With the results of the simulation saved as `sim_basket`, you have the data 
+necessary to compare Kobe to our independent shooter.
+
+Both data sets represent the results of 133 shot attempts, each with the same 
+shooting percentage of 45%. We know that our simulated data is from a shooter 
+that has independent shots. That is, we know the simulated shooter does not have
+a hot hand.
+
+## Comparing Kobe Bryant to the Independent Shooter
+
+Compute the streak lengths of `sim_basket`, and save the results in a data frame called `sim_streak`.
+
+```{r dntpctxmrejxvcuo-setup}
+set.seed(129154)
+sim_basket <- sample(shot_outcomes, size = 133, prob = c(0.45, 0.55), replace = TRUE)
+```
+
+```{r dntpctxmrejxvcuo, exercise = TRUE}
+___ <- ___(sim_basket)
+
+```
+
+
+```{r dntpctxmrejxvcuo-solution}
+# solution code
+sim_streak <- calc_streak(sim_basket)
+
+```
+
+```{r dntpctxmrejxvcuo-check}
+# check code
+gradethis::grade_code()
+```
+
+Make a bar plot of the streaks.
+
+```{r gpsurtgdpohztbuk-setup}
+set.seed(129154)
+sim_basket <- sample(shot_outcomes, size = 133, prob = c(0.45, 0.55), replace = TRUE)
+sim_streak <- calc_streak(sim_basket)
+
+```
+
+```{r gpsurtgdpohztbuk, exercise = TRUE}
+ggplot(data = ___, aes(x = ___)) +
+  ___
+```
+
+```{r gpsurtgdpohztbuk-hint-1}
+ggplot(data = ___, aes(x = ___)) +
+  geom_bar() 
+```
+
+```{r gpsurtgdpohztbuk-solution}
+ggplot(data = sim_streak, aes(x = length)) +
+  geom_bar() 
+```
+
+
+```{r gpsurtgdpohztbuk-check}
+# check code
+gradethis::grade_code()
+```
+
+
+```{r maxstreak2}
+question("What is the typical streak length for this simulated independent shooter with a 45% shooting percentage?",
+    answer("0", correct = T),
+    answer("1"),
+    answer("2"),
+    answer("3"),
+    answer("4"),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+```{r typicalstreak2}
+question("How long is the player's longest streak of baskets in 133 shots?",
+  answer("0"),
+    answer("1"),
+    answer("2"),
+    answer("3"),
+    answer("4", correct = T),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+## Did Kobe have a hot hand?
+
+```{r compare-plots-setup}
+set.seed(129154)
+sim_basket <- sample(shot_outcomes, size = 133, prob = c(0.45, 0.55), replace = TRUE)
+sim_streak <- calc_streak(sim_basket)
+
+kobe_streak <- calc_streak(kobe_basket$shot)
+
+```
+
+```{r compare-plots, exercise = TRUE}
+ggplot(data = kobe_streak, aes(x = length)) +
+  geom_bar() + ylim(0,50) + xlim(-1,7) 
+
+ggplot(data = sim_streak, aes(x = length)) +
+  geom_bar() + ylim(0,50) + xlim(-1,7) 
+```
+
+```{r kobecompare}
+question("How does Kobe Bryant's distribution of streak lengths compare to the distribution of streak lengths for the simulated shooter? ",
+    answer("The distributions look roughly the same.", correct = T),
+    answer("Kobe's distribution is more right skewed."),
+    answer("Kobe's distribution is more left skewed."),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+```{r kobecompare2}
+question("Do you have evidence that the hot hand model fits Kobe's 
+    shooting patterns?",
+    answer("Yes, a hot hand is associated with longer streaks which Kobe has."),
+    answer("Yes, a hot hand is associated with shorter streaks which Kobe has."),
+    answer("No, a hot hand is associated with longer streaks which Kobe does not have.", correct = T),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+    
+## Submit checkpoint
+
+```{r context="server"}
+learnrhash::encoder_logic(strip_output = T)
+```
+
+```{r encode, echo=FALSE}
+learnrhash::encoder_ui(
+  ui_before = div(strong("Submit your hash in the form below."), br(), br()),
+  ui_after  = learnrhash::iframe_ui(
+    src = "https://docs.google.com/forms/d/e/1FAIpQLSda78rAQWziQ-L6eDanGoDAhcfoi6JU_dg-c-6A9rrEXdvJwg/viewform", ## change link, include name
+    width="900px", height= "1000px"
+  )
+)
+```
+
+## Questions for Lab Report
+
+No extra lab report this week (hooray!).
+
+## Deliverables
+
+Make sure you have submitted your hash to the Google Form for the first part of the lab.
+
+
+* * *
+
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a> and was adapted by Sara Stoudt.

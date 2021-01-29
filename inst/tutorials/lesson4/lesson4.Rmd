@@ -430,9 +430,9 @@ When you are finished editing your Markdown document click the "Knit" button and
 
 Submit your Markdown document and knitted file to [Moodle](https://moodle.smith.edu/) as:
 
-LastName-LastName-LastName-L-03.Rmd  (add a third last name if applicable)
+LastName-LastName-LastName-L-04.Rmd  (add a third last name if applicable)
 
-LastName-LastName-LastName-L-03.html
+LastName-LastName-LastName-L-04.html
 
 *Due*: Monday (beginning of class time, Eastern time)
 
