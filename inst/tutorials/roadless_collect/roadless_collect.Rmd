@@ -1,0 +1,166 @@
+---
+title: "Roadless America"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE,message=FALSE}
+library(learnr)
+library(learnrhash)
+library(tidyverse)
+library(gradethis)
+library(openintro)
+library(infer)
+library(mosaic)
+library(shiny)
+library(leaflet)
+
+tutorial_options(
+  # use gradethis for checking
+  exercise.checker = gradethis::grade_learnr
+  )
+knitr::opts_chunk$set(echo = FALSE)
+
+```
+
+## Motivation
+
+#### Original created by: [Sara Stoudt, Yue Cao, Dana Udwin, and Nicholas Horton](https://www.amstat.org/asa/files/pdfs/stew/PercentWithinMileofRoad.pdf)
+#### Adapted by: Sara Stoudt
+
+
+Wilderness is, by definition, roadless.  Untouched areas provide important habitat and play a key role in ensuring ecological balance. According to the U.S. Geological Survey, roads affect the ecology of at least 22% of the land area of the continental United States.{1} Knowing what portion of the US is within 1 mile of a road can help determine wilderness areas since there is a link between access by road and human presence.
+
+A conservation policy called roadless area conservation aims to limit road construction in order to halt negative environmental impact on designated public lands. The US Forest Service has formalized the concept of Inventoried Roadless Areas as lands identified by governmental agencies without roads that could be candidates for roadless area conservation. According to the US Forest Service, inventoried roadless areas comprise only 2% of the land in the continental United States.{2} 
+
+This activity is intended to help reinforce concepts of sampling and confidence intervals while simultaneously understanding how to estimate the proportion of the United States that is within 1 mile of a road. 
+
+Citations:
+{1}"Distance to Nearest Road in the Conterminous United States," US Department of the Interior, US Geological Survey, January 2005.
+{2}"Roadless Area Conservation," US Department of Agrigulture, US Forest Service, 2013.
+
+
+## Data Collection
+
+Behind the scenes this will generate a data frame called "myroadless" that contains 20 random pairs of latitude and longitude coordinates containing the continental United States and set up a function to allow you to view these points on a GoogleMap.
+
+**Click me to get a fresh data set before continuing!**
+
+```{r,echo = F}
+actionButton("action", label = "Generate data")
+```
+
+```{r,context = "server"}
+observeEvent(input$action, {
+  set.seed(sample(1111:9999,1))
+    long <- -runif(nsamp, min = 65, max = 125) # approximate location of continental US
+    lat <- runif(nsamp, min = 25, max = 50) # approximate location of continental US
+    myroadless <- data.frame(
+  sample = 1:nsamp, latitude = round(lat, 4), longitude = round(long, 4),
+  withinContinent = c(rep(NA, nsamp)), within1mile = c(rep(NA, nsamp)),
+  location = character(nsamp))
+    rv$x = myroadless
+  })
+```
+
+```{r, context = "server"}
+getLocation <- function(counter) {
+  leaflet_map(rv$x[counter, "latitude"], rv$x[counter, "longitude"],
+    mark = TRUE, radius = 1, units = "miles"
+  )
+}
+nsamp <- 20
+long <- -runif(nsamp, min = 65, max = 125) # approximate location of continental US
+lat <- runif(nsamp, min = 25, max = 50) # approximate location of continental US
+myroadless <- data.frame(
+  sample = 1:nsamp, latitude = round(lat, 4), longitude = round(long, 4),
+  withinContinent = c(rep(NA, nsamp)), within1mile = c(rep(NA, nsamp)),
+  location = character(nsamp)
+)
+
+rv <- reactiveValues(x = myroadless)
+```
+
+```{r}
+tableOutput("datatab")
+```
+
+```{r, context = "server"}
+output$datatab = renderTable({rv$x})
+```
+
+
+A circle of radius one mile will be drawn around your location. Zoom in or out as necessary to determine the following:
+
+1.) *Is it within the continental United States?*
+
+2.) *Is it within one mile of a road?* 
+
+This only applies if you were within the continental United States.
+
+3.) Tally how many of your locations are within the continental United States and how many are within one mile of a road. 
+
+```{r}
+leafletOutput("m1")
+leafletOutput("m2")
+leafletOutput("m3")
+leafletOutput("m4")
+leafletOutput("m5")
+leafletOutput("m6")
+leafletOutput("m7")
+leafletOutput("m8")
+leafletOutput("m9")
+leafletOutput("m10")
+leafletOutput("m11")
+leafletOutput("m12")
+leafletOutput("m13")
+leafletOutput("m14")
+leafletOutput("m15")
+leafletOutput("m16")
+leafletOutput("m17")
+leafletOutput("m18")
+leafletOutput("m19")
+leafletOutput("m20")
+```
+    
+
+```{r, context = "server"}
+output$m1 <- renderLeaflet({getLocation(1)})
+output$m2 <- renderLeaflet({getLocation(2)})
+output$m3 <- renderLeaflet({getLocation(3)})
+output$m4 <- renderLeaflet({getLocation(4)})
+output$m5 <- renderLeaflet({getLocation(5)})
+output$m6 <- renderLeaflet({getLocation(6)})
+output$m7 <- renderLeaflet({getLocation(7)})
+output$m8 <- renderLeaflet({getLocation(8)})
+output$m9 <- renderLeaflet({getLocation(9)})
+output$m10 <- renderLeaflet({getLocation(10)})
+output$m11 <- renderLeaflet({getLocation(11)})
+output$m12 <- renderLeaflet({getLocation(12)})
+output$m13 <- renderLeaflet({getLocation(13)})
+output$m14 <- renderLeaflet({getLocation(14)})
+output$m15 <- renderLeaflet({getLocation(15)})
+output$m16 <- renderLeaflet({getLocation(16)})
+output$m17 <- renderLeaflet({getLocation(17)})
+output$m18 <- renderLeaflet({getLocation(18)})
+output$m19 <- renderLeaflet({getLocation(19)})
+output$m20 <- renderLeaflet({getLocation(20)})
+```
+
+## Submit
+
+(no need to generate and submit hash)
+
+```{r encode, echo=FALSE}
+learnrhash::encoder_ui(
+  ui_before = div(strong("Submit your results here."), br(), br()),
+  ui_after  = learnrhash::iframe_ui(
+    src = "https://docs.google.com/forms/d/e/1FAIpQLSc_sEZEQ0TCkbgHDTM16g9F9Y_v5Y2VIXsV_wL4gy3IyBNRhA/viewform", ## change link, include name
+    width="900px", height= "1000px"
+  )
+)
+```
+
