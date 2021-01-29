@@ -1,6 +1,5 @@
 ---
 title: "Exploring Data"
-author: "Sara Stoudt"
 output: 
   learnr::tutorial:
     progressive: true

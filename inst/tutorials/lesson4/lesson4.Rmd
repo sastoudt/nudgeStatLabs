@@ -1,0 +1,441 @@
+---
+title: "'Foundations for statistical inference - Confidence intervals'"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE,message=FALSE}
+library(learnr)
+library(tidyverse)
+library(gradethis)
+library(openintro)
+library(infer)
+tutorial_options(
+  # use gradethis for checking
+  exercise.checker = gradethis::grade_learnr
+  )
+knitr::opts_chunk$set(echo = FALSE)
+
+us_adults <- tibble(
+  climate_change_affects = c(rep("Yes", 62000), rep("No", 38000))
+)
+```
+
+## Logistics
+
+This lab will occur remotely and in groups of three. For those of you participating synchronously, you will find the Zoom room information on [Moodle](https://moodle.smith.edu/). I will assign you to a breakout room with your partner(s) from last week. 
+
+For those participating syncronously I will be available in the main Zoom room to answer questions. If you have a question or technical problem, click the "Ask for Help" button (it looks like a question mark) in the meeting controls, and I will be alerted to join your breakout room.  
+
+For those of you participating asynchronously, alert me to technical challengs over Slack DM, and I will get back to you as soon as possible. For questions about the content of the lab, please sign up for an office hour time block. 
+
+Each of you should be writing and running code, examining output, and answering the exercises throughout the lab. However, you only need to turn in one final lab report. To be clear, everyone submits files to Moodle, but the files can be the same within a group. Today one of you should be the main recorder of answers in the lab document. You will share this document with your teammates. As you work it may be helpful to share your screen. It may be helpful to share your screen. 
+
+You all should also feel free to ask and answer questions amongst yourselves via Zoom if participating synchronously or via Slack if participating asynchronously. Please note at the end of the lab document who you consulted for help.
+
+## Getting started
+
+If you have access to data on an entire population, say the opinion of every adult in the United States on whether or not they think climate change is affecting their local community, it's straightforward to answer questions like, "What percent of US adults think climate change is affecting their local community?". 
+Similarly, if you had demographic information on the population you could examine how, if at all, this opinion varies among young and old adults and adults with different leanings.
+If you have access to only a sample of the population, as is often the case, the task becomes more complicated. 
+What is your best guess for this proportion if you only have data from a small sample of adults?
+This type of situation requires that you use your sample to make inference on what your population looks like.
+
+
+### Load packages
+
+In this lab, we will explore and visualize the data using the **tidyverse** suite of packages, and perform statistical inference using **infer**.
+
+Let's load the packages.
+
+```{r load-packages, exercise = TRUE}
+library(tidyverse)
+library(openintro)
+library(infer)
+```
+
+### Random samples
+
+It doesn't really matter what you pick for the seed, but I usually use the numbers from the current date and time (but exclude any zeros). Kellie Ottoboni, who studied random number generators, told me a good heuristic is to avoid using zeros. 
+
+```{r set-seed, exercise = T}
+set.seed(818113)
+```
+
+
+## The data
+
+A 2019 Pew Research report states the following:
+
+To keep our computation simple, we will assume a total population size of 100,000 (even though that's smaller than the population size of all US adults).
+
+> Roughly six-in-ten U.S. adults (62%) say climate change is currently affecting their local community either a great deal or some, according to a new Pew Research Center survey.
+>
+>**Source:** [Most Americans say climate change impacts their community, but effects vary by region](https://www.pewresearch.org/fact-tank/2019/12/02/most-americans-say-climate-change-impacts-their-community-but-effects-vary-by-region/)
+
+In this lab, you will assume this 62% is a true population proportion and learn about how sample proportions can vary from sample to sample by taking smaller samples from the population. 
+We will first create our population assuming a population size of 100,000. 
+This means 62,000 (62%) of the adult population think climate change impacts their community, and the remaining 38,000 does not think so.
+
+```{r, data, exercise = T}
+us_adults <- tibble(
+  climate_change_affects = c(rep("Yes", 62000), rep("No", 38000))
+)
+```
+
+The name of the data frame is `us_adults` and the name of the variable that contains responses to the question *"Do you think climate change is affecting your local community?"* is `climate_change_affects`.
+
+We can quickly visualize the distribution of these responses using a bar plot.
+
+```{r bar-plot-pop, exercise = T}
+ggplot(us_adults, aes(x = climate_change_affects)) +
+  geom_bar() +
+  labs(
+    x = "", y = "",
+    title = "Do you think climate change is affecting your local community?"
+  ) +
+  coord_flip() 
+```
+
+We can also obtain summary statistics to confirm we constructed the data frame correctly.
+
+```{r summ-stat-pop, exercise = T}
+us_adults %>%
+  count(climate_change_affects) %>%
+  mutate(p = n /sum(n))
+```
+
+In this lab, you'll start with a simple random sample of size 60 from the population.
+
+```{r sample, exercise = T}
+n <- 60
+samp <- us_adults %>%
+  slice_sample(n = n)
+```
+
+Just like we did with the population, we can calculate the proportion of those **in this sample** who think climate change affects their local community. What percent of the adults in your sample think climate change affects their local community?
+
+```{r znlwjvsocfqspnrg-setup}
+set.seed(1291211)
+n <- 60
+samp <- us_adults %>%
+  slice_sample(n = n)
+```
+
+```{r znlwjvsocfqspnrg, exercise = TRUE}
+samp %>% 
+  count(___) %>%
+  mutate(p_hat = ___)
+```
+
+
+```{r znlwjvsocfqspnrg-solution}
+samp %>%
+  count(climate_change_affects) %>%
+  mutate(p_hat = n /sum(n))
+```
+
+```{r znlwjvsocfqspnrg-check}
+# check code
+gradethis::grade_code()
+```
+
+## Confidence intervals
+
+Return for a moment to the question that first motivated this lab: based on this sample, what can you infer about the population? 
+With just one sample, the best estimate of the proportion of US adults who think climate change affects their local community would be the sample proportion, usually denoted as $\hat{p}$ (here we are calling it `p_hat`). 
+That serves as a good **point estimate**, but it would be useful to also communicate how uncertain you are of that estimate. 
+This uncertainty can be quantified using a **confidence interval**.
+
+One way of calculating a confidence interval for a population proportion is using simulation, or to be more specific, using **bootstrapping**. 
+The term **bootstrapping** comes from the phrase "pulling oneself up by one’s bootstraps", which is a metaphor for accomplishing an impossible task without any outside help.
+In this case the impossible task is estimating a population parameter (the unknown population proportion), and we’ll accomplish it using data from only the given sample.
+Note that this notion of saying something about a population parameter using only information from an observed sample is the crux of statistical inference, it is not limited to bootstrapping. 
+
+In essence, bootstrapping assumes that there are more of observations in the populations like the ones in the observed sample. 
+So we "reconstruct" the population by resampling from our sample, with replacement. 
+The bootstrapping scheme is as follows:
+
+- **Step 1.** Take a bootstrap sample - a random sample taken **with replacement** from the original sample, of the same size as the original sample.
+- **Step 2.** Calculate the bootstrap statistic - a statistic such as mean, median, proportion, slope, etc. computed on the bootstrap samples.
+- **Step 3.** Repeat steps (1) and (2) many times to create a bootstrap distribution - a distribution of bootstrap statistics.
+- **Step 4.** Calculate the bounds of the XX% confidence interval as the middle XX% of the bootstrap distribution.
+
+Instead of coding up each of these steps, we will construct confidence intervals using the **infer** package.
+
+Below is an overview of the functions we will use to construct this confidence interval:
+
+Function    | Purpose
+----------- | -------
+`specify`   | Identify your variable of interest
+`generate`  | The number of samples you want to generate
+`calculate` | The sample statistic you want to do inference with, or you can also think of this as the population parameter you want to do inference for
+`get_ci`    | Find the confidence interval
+
+This code will find the 95 percent confidence interval for proportion of US adults who think climate change affects their local community.
+
+```{r confidence_interval_infer-setup}
+set.seed(1291211)
+n <- 60
+samp <- us_adults %>%
+  slice_sample(n = n)
+```
+
+```{r confidence_interval_infer, exercise = TRUE}
+samp %>%
+  specify(response = climate_change_affects, success = "Yes") %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "prop") %>%
+  get_ci(level = 0.95)
+```
+
+- In `specify` we specify the `response` variable and the level of that variable we are calling a `success`.
+- In `generate` we provide the number of resamples we want from the population in the `reps` argument (this should be a reasonably large number) as well as the type of resampling we want to do, which is `"bootstrap"` in the case of constructing a confidence interval.
+- Then, we `calculate` the sample statistic of interest for each of these resamples, which is `prop`ortion.
+
+Feel free to test out the rest of the arguments for these functions, since these commands will be used together to calculate confidence intervals and solve inference problems for the rest of the semester.
+But we will also walk you through more examples in future chapters.
+
+To recap: even though we don't know what the full population looks like, we're 95% confident that the true proportion of US adults who think climate change affects their local community is between the two bounds reported as result of this pipeline.
+
+In this case, you have the rare luxury of knowing the true population proportion (62%) since you have data on the entire population. 
+
+```{r containTruth}
+question("Did the confidence interval contain the true population proportion (62%)?",
+    answer("Yes", correct = T),
+    answer("No"),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+## Confidence levels
+
+What if we had a different sample? Create a new sample of `us_adults` and calculate the sample proportion.
+
+```{r kmxoyxexccpwduwm-setup}
+set.seed(1291246)
+```
+
+```{r kmxoyxexccpwduwm, exercise = TRUE}
+n <- 60
+new_samp <- ___ %>%
+  ___(n = n) 
+
+new_samp %>%
+  ___(climate_change_affects) %>%
+  ___(p_hat = )
+```
+
+
+```{r kmxoyxexccpwduwm-solution}
+n <- 60
+new_samp <- us_adults %>%
+  slice_sample(n = n) 
+
+new_samp %>%
+  count(climate_change_affects) %>%
+  mutate(p_hat = n / sum(n))
+```
+
+```{r kmxoyxexccpwduwm-check}
+# check code
+gradethis::grade_code()
+```
+
+Now calculate a confidence interval for this estimate.
+
+```{r itbkotliorstmmvd-setup}
+set.seed(1291246)
+n <- 60
+new_samp <- us_adults %>%
+  slice_sample(n = n) 
+```
+
+
+```{r itbkotliorstmmvd, exercise = TRUE}
+new_samp %>%
+  specify(response = ___, success = ___) %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "prop") %>%
+  get_ci(level = 0.95)
+```
+
+
+```{r itbkotliorstmmvd-solution}
+new_samp %>%
+  specify(response = climate_change_affects, success = "Yes") %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "prop") %>%
+  get_ci(level = 0.95)
+```
+
+```{r itbkotliorstmmvd-check}
+# check code
+gradethis::grade_code()
+```
+
+```{r containTruth2}
+question("Did this new confidence interval contain the true population proportion (62%)?",
+    answer("Yes", correct = T),
+    answer("No"),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+## Number of bootstrap samples
+
+Tryout 100, 500, and 1000 bootstrap samples and compare the confidence intervals. 
+
+```{r confidence_interval_infer2-setup}
+set.seed(1291211)
+n <- 60
+samp <- us_adults %>%
+  slice_sample(n = n)
+```
+
+```{r confidence_interval_infer2, exercise = TRUE}
+samp %>%
+  specify(response = climate_change_affects, success = "Yes") %>%
+  generate(reps = ___, type = "bootstrap") %>%
+  calculate(stat = "prop") %>%
+  get_ci(level = 0.95)
+
+samp %>%
+  specify(response = climate_change_affects, success = "Yes") %>%
+  generate(reps = ___, type = "bootstrap") %>%
+  calculate(stat = "prop") %>%
+  get_ci(level = 0.95)
+
+samp %>%
+  specify(response = climate_change_affects, success = "Yes") %>%
+  generate(reps = ___, type = "bootstrap") %>%
+  calculate(stat = "prop") %>%
+  get_ci(level = 0.95)
+```
+
+```{r confidence_interval_infer2-solution}
+samp %>%
+  specify(response = climate_change_affects, success = "Yes") %>%
+  generate(reps = 100, type = "bootstrap") %>%
+  calculate(stat = "prop") %>%
+  get_ci(level = 0.95)
+
+samp %>%
+  specify(response = climate_change_affects, success = "Yes") %>%
+  generate(reps = 500, type = "bootstrap") %>%
+  calculate(stat = "prop") %>%
+  get_ci(level = 0.95)
+
+samp %>%
+  specify(response = climate_change_affects, success = "Yes") %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "prop") %>%
+  get_ci(level = 0.95)
+```
+
+```{r confidence_interval_infer2-check}
+# check code
+gradethis::grade_code()
+```
+
+```{r ciwidth}
+question("How does the width of the interval change as you decrease the number of bootstrap samples? ",
+    answer("The interval gets narrower."),
+    answer("The interval gets wider."),
+    answer("The interval stays roughly the same width.",correct = T),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+```{r cise}
+question("Does changing the number of bootstap samples affect the standard error? **Hint:** Remember that a 95% confidence interval is roughly our original estimate +/- 2*SE.",
+    answer("Yes, the standard error gets smaller."),
+    answer("Yes, the standard error gets bigger."),
+    answer("No, the standard error stays roughly the same.",correct = T),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+Note that in Lab 3 we changed the original sample size to see how that affected the standard error. The distinction here is we are now changing the number of times to resample, given an original sample size.
+
+## Submit checkpoint
+
+```{r context="server"}
+learnrhash::encoder_logic(strip_output = T)
+```
+
+```{r encode, echo=FALSE}
+learnrhash::encoder_ui(
+  ui_before = div(strong("Submit your hash in the form below."), br(), br()),
+  ui_after  = learnrhash::iframe_ui(
+    src = "https://docs.google.com/forms/d/e/1FAIpQLSda78rAQWziQ-L6eDanGoDAhcfoi6JU_dg-c-6A9rrEXdvJwg/viewform", ## change link, include name
+    width="900px", height= "1000px"
+  )
+)
+```
+
+## Creating a reproducible lab report
+
+For the rest of this lab you will R Markdown to create a reproducible lab report. 
+In RStudio, go to New File -> R Markdown... Then, choose From Template and then choose `Lab Report` from the list of templates. Make sure to name the document appropriately and pick a location for the file where you know how to find it on your computer.
+
+See the following video describing how to get started with creating these 
+reports for this lab, and all future labs:
+
+[**Basic R Markdown with an OpenIntro Lab**](https://www.youtube.com/watch?v=Pdc368lS2hk)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Pdc368lS2hk" frameborder="0" allowfullscreen></iframe>
+
+**Note: This video was made using `oilabs`. We will NOT be using `oilabs`. Be sure to pick the Lab Report template that goes with `openintro` as shown in screenshot above. Make sure you have `library(openintro)` in your first chunk not `library(oilabs)`.**
+
+## Questions for Lab Report
+
+Answer in an Rmd file based on the lab report template. Remember you will need to load appropriate packages, set a seed, and create the dataset.
+
+In this part of the lab, you will analyze many samples to learn more about how sample proportions and confidence intervals constructed based on those samples vary from one sample to another.
+
+In class each student did the following:
+
+-   Obtained a random sample.
+-   Calculated the sample proportion, and used these to calculate and store the lower and upper bounds of the confidence intervals.
+
+We now have a confidence interval for every student.
+
+1. Read in the dataset.
+
+Download the csv file and put it in the same folder as your lab Rmd file. When you go to knit this document, R will look for the data in the same place where the Rmd file lives.
+
+```{r, eval = F}
+data <- read.csv("roadless-america-data.csv")
+head(data)
+```
+
+2. Interpret the first confidence interval in context. 
+3. What proportion cover...
+4. Would we expect that proportion to get closer, further away, or stay roughly the same, if we had 200 students participating? Explain your answer.
+
+
+## Deliverables
+
+Make sure you have submitted your hash to the Google Form for the first part of the lab.
+
+When you are finished editing your Markdown document click the "Knit" button and choose "Knit to HTML" in the top left corner of RStudio. This will run all of your code and create a formatted document of the output. If you get an error, it means something in your Markdown file isn't right, either an error in code or some error in formatting. Call me into your breakout room, and we will troubleshoot.
+
+Submit your Markdown document and knitted file to [Moodle](https://moodle.smith.edu/) as:
+
+LastName-LastName-LastName-L-03.Rmd  (add a third last name if applicable)
+
+LastName-LastName-LastName-L-03.html
+
+*Due*: Monday (beginning of class time, Eastern time)
+
+
+* * *
+
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a> and was adapted by Sara Stoudt.
