@@ -1,0 +1,377 @@
+---
+title: "Multiple linear regression"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE,message=FALSE}
+library(learnr)
+library(learnrhash)
+library(tidyverse)
+library(gradethis)
+library(openintro)
+library(infer)
+tutorial_options(
+  # use gradethis for checking
+  exercise.checker = gradethis::grade_learnr
+  )
+knitr::opts_chunk$set(echo = FALSE)
+
+
+```
+
+## Logistics
+
+This lab will occur remotely and in groups of three. You will work with your final project team. For those of you participating synchronously, you will find the Zoom room information on [Moodle](https://moodle.smith.edu/). I will assign you to a breakout room with your partner(s) from last week. 
+
+For those participating syncronously I will be available in the main Zoom room to answer questions. If you have a question or technical problem, click the "Ask for Help" button (it looks like a question mark) in the meeting controls, and I will be alerted to join your breakout room.  
+
+For those of you participating asynchronously, alert me to technical challengs over Slack DM, and I will get back to you as soon as possible. For questions about the content of the lab, please sign up for an office hour time block. 
+
+Each of you should be writing and running code, examining output, and answering the exercises throughout the lab. However, you only need to turn in one final lab report. To be clear, everyone submits files to Moodle, but the files can be the same within a group. Today one of you should be the main recorder of answers in the lab document. You will share this document with your teammates. As you work it may be helpful to share your screen. It may be helpful to share your screen. 
+
+You all should also feel free to ask and answer questions amongst yourselves via Zoom if participating synchronously or via Slack if participating asynchronously. Please note at the end of the lab document who you consulted for help.
+
+
+## Getting Started
+
+Many college courses conclude by giving students the opportunity to evaluate 
+the course and the instructor anonymously. However, the use of these student 
+evaluations as an indicator of course quality and teaching effectiveness is 
+often criticized because these measures may reflect the influence of 
+non-teaching related characteristics, such as the physical appearance of the 
+instructor. The article titled, "Beauty in the classroom: instructors' 
+pulchritude and putative pedagogical productivity" by Hamermesh and Parker 
+found that instructors who are viewed to be better looking receive higher 
+instructional ratings. 
+
+Here, you will analyze the data from this study in order to learn what goes 
+into a positive professor evaluation. The goal is to show you how to fit and evaluate the models that you will be using in your final project.
+
+### Load packages
+
+In this lab, you will explore and visualize the data using the **tidyverse** suite of 
+packages. The data can be found in the companion package for OpenIntro resources, **openintro**.
+
+Let's load the packages.
+
+```{r load-packages, exercise = T}
+library(tidyverse)
+library(openintro)
+```
+
+### The data
+
+The data were gathered from end of semester student evaluations for a large 
+sample of professors from the University of Texas at Austin. In addition, six 
+students rated the professors' physical appearance. The result is a data frame 
+where each row contains a different course and columns represent variables about 
+the courses and professors. It's called `evals`.
+
+```{r look, exercise = T}
+glimpse(evals)
+```
+
+We have observations on 21 different variables, some categorical and some 
+numerical. The meaning of each variable can be found by bringing up the help file:
+
+```{r help-evals, exercise = T}
+?evals
+```
+
+## Exploring the data
+
+Make a plot of the distribution of `score`. 
+
+```{r nvzlxsivbjxdhbqy, exercise = TRUE}
+ggplot(___, aes(x = ___)) +  ___
+```
+
+
+```{r nvzlxsivbjxdhbqy-solution}
+ggplot(evals, aes(x = score )) + geom_histogram()
+```
+
+```{r nvzlxsivbjxdhbqy-check}
+# check code
+gradethis::grade_code()
+```
+
+```{r isskew}
+question("Is the distribution skewed?",
+    answer("No, the distribution is symmetric."),
+    answer("Yes, the distribution is skewed right."),
+    answer("Yes, the distribution is skewed left.", correct = T),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+
+Make a plot of the relationship between `score` and  beauty score `bty_avg` (we want to use beauty score to help us understand score) and describe this relationship. 
+
+```{r wvmlhvlgkbnhonag, exercise = TRUE}
+ggplot(___, aes(x = ___, y = ___))+___
+
+```
+
+```{r wvmlhvlgkbnhonag-solution}
+ggplot(evals, aes(x = bty_avg, y = score))+geom_point()
+```
+
+```{r wvmlhvlgkbnhonag-check}
+# check code
+gradethis::grade_code()
+```
+
+Adapt your plot from above by using `col = gender` within `aes` to see how the relationship differs by gender of the faculty member. 
+
+```{r wvmlhvlgkbnhonag2, exercise = TRUE}
+ggplot(___, aes(x = ___, y = ___, col = gender))+___
+
+```
+
+```{r wvmlhvlgkbnhonag2-solution}
+ggplot(evals, aes(x = bty_avg, y = score))+geom_point()
+```
+
+```{r wvmlhvlgkbnhonag2-check}
+# check code
+gradethis::grade_code()
+```
+
+
+## Simple linear regression
+
+```{r simpmod, exercise = T}
+base_model <- lm(score ~ bty_avg, data = evals)
+summary(base_model)
+```
+
+Using `geom_smooth` and choosing `method = "lm"` will add the simple linear regression line to the plot.
+
+```{r plotsimp, exercise = T}
+ggplot(evals, aes(x = bty_avg, y = score)) + geom_point() + geom_smooth(method = "lm", se = F)
+```
+
+```{r slopeint}
+question("Interpret this slope in context.",
+  answer("With a one unit increase in bty_avg comes a 0.067 unit increase in score."),
+  answer("A one unit increase in bty_avg is associated with a 3,88 unit increase in score on average."),
+  answer("A one unit increase in bty_avg is associated with a 0.067 unit increase in score on average.", correct = T),
+  allow_retry = TRUE,
+  random_answer_order = F
+)
+```
+
+The last column `Pr(>|t|)` gives a p-value for the hypothesis test of statistical significance for each coefficient (in this case intercept and slope for `bty_avg`). In each case the null hypothesis is that the coefficient is equal to 0 and the alternative hypothesis is that the coefficient is not equal to zero. 
+
+```{r intsig}
+question("Is the intercept statistically significantly different from zero at the 0.01 signifcance level?",
+  answer("Yes, 2e-16 < 0.1", correct = T),
+  answer("Yes, 5.08e-05 < 0.1"),
+    answer("No, 2e-16 < 0.1"),
+  answer("No, 5.08e-05 < 0.1"),
+  allow_retry = TRUE,
+  random_answer_order = F
+)
+```
+
+```{r slopesig}
+question("Is the slope statistically significantly different from zero at the 0.01 signifcance level?",
+  answer("Yes, 2e-16 < 0.1"),
+  answer("Yes, 5.08e-05 < 0.1", correct = T),
+    answer("No, 2e-16 < 0.1"),
+  answer("No, 5.08e-05 < 0.1"),
+  allow_retry = TRUE,
+  random_answer_order = F
+)
+```
+
+
+## Parallel Slopes
+
+A parallel slope approach is denoted with a plus sign between two covariates.
+
+
+```{r parallel, exercise = T}
+parallel_slopes_model <- lm(score ~ bty_avg + gender, data = evals)
+summary(parallel_slopes_model)
+```
+
+We can use `geom_abline` to specify the slope and intercept for each category so that we can draw two lines on the plot. When plotting two categories, #00BFC4 is the default color for the reference category and "#F8766D" is the default color for a second category, so we specify those to match the points. In your projects, you might want to do this more automatically. See [this reference](https://moderndive.github.io/moderndive/reference/geom_parallel_slopes.html) for guidance.
+
+```{r plotparallel, exercise = T}
+ggplot(evals, aes(bty_avg, score, col = gender)) + geom_point() + geom_abline(slope = 0.07416, intercept = 3.74734 + 0.17239, col = "#00BFC4") + geom_abline(slope = 0.07416, intercept = 3.74734 , col = "#F8766D")
+```
+
+
+```{r eqf}
+question("Write the equation of the regression line for females.",
+  answer("score = 3.75 + 0.07*bty_avg"),
+  answer("score = 3.75 + 0.17 + 0.07*bty_avg"),
+  answer("score_hat = 3.75 + 0.07*bty_avg", correct = T),
+  answer("score_hat = 3.75 + 0.17 + 0.07*bty_avg"),
+  allow_retry = TRUE,
+  random_answer_order = F
+)
+```
+
+```{r eqm}
+question("Write the equation of the regression line for males.",
+  answer("score = 3.75 + 0.07 * bty_avg"),
+  answer("score = 3.75 + 0.17 + 0.07 * bty_avg"),
+  answer("score_hat = 3.75 + 0.07 * bty_avg"),
+  answer("score_hat = 3.75 + 0.17 + 0.07 * bty_avg", correct = T),
+  allow_retry = TRUE,
+  random_answer_order = F
+)
+```
+
+
+## Interaction Model 
+
+An interaction is denoted as a product (*) between two covariates. 
+
+```{r interaction, exercise = T}
+interaction_model <- lm(score ~ bty_avg * gender, data = evals)
+summary(interaction_model)
+```
+
+Using `geom_smooth` and choosing `method = "lm"` will add the interaction linear regression line to the plot (ggplot knows to make a different line per gender because the points are colored by gender).
+
+```{r plotinteration, exercise = T}
+ggplot(evals, aes(x = bty_avg, y = score, col = gender)) + geom_point() + geom_smooth(method = "lm", se = F)
+```
+
+```{r eqf2}
+question("Write the equation of the regression line for females.",
+  answer("score_hat = 3.95 + 0.03 * bty_avg", correct = T),
+  answer("score_hat = 3.95 + -0.18 + 0.03 * bty_avg"),
+  answer("score_hat = 3.95 + -0.18 + (0.03 + 0.08) * bty_avg"),
+  answer("score_hat = 3.95 + (0.03 + 0.08) * bty_avg"),
+  allow_retry = TRUE,
+  random_answer_order = F
+)
+```
+
+```{r eqm2}
+question("Write the equation of the regression line for males.",
+  answer("score_hat = 3.95 + 0.03 * bty_avg"),
+  answer("score_hat = 3.95 + -0.18 + 0.03 * bty_avg"),
+  answer("score_hat = 3.95 + -0.18 + (0.03 + 0.08) * bty_avg", correct = T),
+  answer("score_hat = 3.95 + (0.03 + 0.08) * bty_avg"),
+  allow_retry = TRUE,
+  random_answer_order = F
+)
+```
+
+
+## Which is best?
+
+One way to define "best" is to consider how much of the variability in the scores are explained by the model. Compare the multiple R-squared values for these three models. 
+
+```{r rsq-setup}
+base_model <- lm(score ~ bty_avg, data = evals)
+
+parallel_slopes_model <- lm(score ~ bty_avg + gender, data = evals)
+
+interaction_model <- lm(score ~ bty_avg * gender, data = evals)
+```
+
+```{r rsq, exercise = TRUE}
+summary(base_model)
+summary(parallel_slopes_model)
+summary(interaction_model)
+```
+
+
+Note that as the models increase in complexity, the multiple R-squared value increases. This is always the case.Is that extra complexity worth it though? One way of telling is whether the extra terms (the extra intercept or extra slope term) are statistically significantly different than zero. If not, we cannot reject the null hypothesis that they are actually zero and that extra complexity may not be worth it.
+
+## Checking conditions
+
+Another way to decide which model is "best" is to determine which one meets the modeling assumptions best. Look at the different residual plots for the three models (`base_model`, `parallel_slopes_model` and `interaction_model`) and compare.
+
+```{r checkcond-setup}
+base_model <- lm(score ~ bty_avg, data = evals)
+
+parallel_slopes_model <- lm(score ~ bty_avg + gender, data = evals)
+
+interaction_model <- lm(score ~ bty_avg * gender, data = evals)
+```
+
+```{r checkcond, exercise = TRUE}
+
+ggplot(data = ___, aes(x = .resid)) +
+  geom_histogram() +
+  xlab("Residuals")
+
+ggplot(data = ___, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  xlab("Fitted values") +
+  ylab("Residuals")
+```
+
+
+## Submit checkpoint
+
+```{r context="server"}
+learnrhash::encoder_logic(strip_output = T)
+```
+
+```{r encode, echo=FALSE}
+learnrhash::encoder_ui(
+  ui_before = div(strong("Submit your hash in the form below."), br(), br()),
+  ui_after  = learnrhash::iframe_ui(
+    src = "https://docs.google.com/forms/d/e/1FAIpQLSda78rAQWziQ-L6eDanGoDAhcfoi6JU_dg-c-6A9rrEXdvJwg/viewform", ## change link, include name
+    width="900px", height= "1000px"
+  )
+)
+```
+
+## Creating a reproducible lab report
+
+For the rest of this lab you will R Markdown to create a reproducible lab report. 
+In RStudio, go to New File -> R Markdown... Then, choose From Template and then choose `Lab Report` from the list of templates. Make sure to name the document appropriately and pick a location for the file where you know how to find it on your computer.
+
+See the following video describing how to get started with creating these 
+reports for this lab, and all future labs:
+
+[**Basic R Markdown with an OpenIntro Lab**](https://www.youtube.com/watch?v=Pdc368lS2hk)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Pdc368lS2hk" frameborder="0" allowfullscreen></iframe>
+
+**Note: This video was made using `oilabs`. We will NOT be using `oilabs`. Be sure to pick the Lab Report template that goes with `openintro` as shown in screenshot above. Make sure you have `library(openintro)` in your first chunk not `library(oilabs)`.**
+
+## Questions for Lab Report
+
+Answer in an Rmd file based on the lab report template. Remember you will need to load appropriate packages, set a seed, and load data. For this lab report you will work on the dataset you have chosen for your project. Read in your data file. Remember that you need to put the csv file in the same folder as your lab Rmd file for the lab report to knit.
+
+1. Fit two linear regressions: a parallel slopes model and an interaction model.
+
+2. Write the regression equations and interpret the intercepts and slopes in the context of the relationship between the two variables. Remember to be careful with your language and avoid causal words.
+
+3. Assess the three assumptions needed to assess whether the linear model is reliable (you should make 3 plots for each regression model). Are the assumptions met? Explain why or why not.
+
+4. Which of these two models do you prefer and why?
+
+## Deliverables
+
+Make sure you have submitted your hash to the Google Form for the first part of the lab.
+
+When you are finished editing your Markdown document click the "Knit" button and choose "Knit to HTML" in the top left corner of RStudio. This will run all of your code and create a formatted document of the output. If you get an error, it means something in your Markdown file isn't right, either an error in code or some error in formatting. Call me into your breakout room, and we will troubleshoot.
+
+Submit your Markdown document and knitted file to [Moodle](https://moodle.smith.edu/) as:
+
+LastName-LastName-LastName-L-09.Rmd  (add a third last name if applicable)
+
+LastName-LastName-LastName-L-09.html
+
+*Due*: Monday (beginning of class time, Eastern time)
+
+* * *
+
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a> and was adapted by Sara Stoudt.

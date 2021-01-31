@@ -1,5 +1,5 @@
 ---
-title: "Inference for categorical data"
+title: "Introduction to linear regression"
 output: 
   learnr::tutorial:
     progressive: true
