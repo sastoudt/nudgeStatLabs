@@ -1,0 +1,246 @@
+---
+title: "When the bootstrap fails"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE,message=FALSE}
+library(learnr)
+library(learnrhash)
+library(tidyverse)
+library(gradethis)
+library(openintro)
+library(infer)
+tutorial_options(
+  # use gradethis for checking
+  exercise.checker = gradethis::grade_learnr
+  )
+knitr::opts_chunk$set(echo = FALSE)
+
+fructose_measurements <- tibble(measured = c(39.5, 39.3, 40.3))
+bootstrap_samples <- fructose_measurements %>%
+    rep_sample_n(size = 3, reps = 50, replace = TRUE)
+bootstrap_samples_organize <- bootstrap_samples %>%
+  group_by(replicate) %>%
+  summarise(min = min(measured), middle = sort(measured)[2], max = max(measured))
+no_replicate_column <- bootstrap_samples_organize %>% 
+  select(-replicate)
+duplicate_info <- bootstrap_samples_organize %>%
+  select(-replicate) %>%
+  group_by_all() %>%
+  summarise(count = n())
+```
+
+## Logistics
+
+This lab will occur remotely and in groups of three. You will work with your final project team so that if you finish early you can work on your project together. For those of you participating synchronously, you will find the Zoom room information on [Moodle](https://moodle.smith.edu/). I will assign you to a breakout room with your partner(s) from last week. 
+
+For those participating syncronously I will be available in the main Zoom room to answer questions. If you have a question or technical problem, click the "Ask for Help" button (it looks like a question mark) in the meeting controls, and I will be alerted to join your breakout room.  
+
+For those of you participating asynchronously, alert me to technical challengs over Slack DM, and I will get back to you as soon as possible. For questions about the content of the lab, please sign up for an office hour time block. 
+
+Each of you should be writing and running code, examining output, and answering the exercises throughout the lab. However, you only need to turn in one final lab report. To be clear, everyone submits files to Moodle, but the files can be the same within a group. Today one of you should be the main recorder of answers in the lab document. You will share this document with your teammates. As you work it may be helpful to share your screen. It may be helpful to share your screen. 
+
+You all should also feel free to ask and answer questions amongst yourselves via Zoom if participating synchronously or via Slack if participating asynchronously. Please note at the end of the lab document who you consulted for help.
+
+Because this is an experimental lab, it will be graded out of 25 instead of 50 to lower the weight towards your grade and (hopefully) lower the stress involved.
+
+## Load packages
+
+In this lab, we will explore and visualize the data using the **tidyverse** suite of packages as well as the **openintro** package.
+
+Let's load the packages.
+
+```{r, packages, exercise = T}
+library(tidyverse)
+library(infer)
+```
+
+
+## Small Data
+
+The national metrology (measurement science) institute of Argentina made triplicate determinations of the mass fraction of fructose in honey using
+high-performance liquid chromatography, and obtained the following values.
+
+```{r, data, exercise = T}
+fructose_measurements <- tibble(measured = c(39.5, 39.3, 40.3))
+```
+
+Use R code to get 50 resamplings of three measurements each (with replacement). Name this dataframe `bootstrap_samples`.
+
+```{r dxqjmkiirhzxgmzj, exercise = TRUE}
+bootstrap_samples <- ___ %>%
+    ___(size = ___, reps = ___, replace = ___)
+
+head(bootstrap_samples)
+```
+
+```{r dxqjmkiirhzxgmzj-hint-1}
+bootstrap_samples <- fructose_measurements %>%
+    rep_sample_n(size = ___, reps = ___, replace = ___)
+
+head(bootstrap_samples)
+```
+
+```{r dxqjmkiirhzxgmzj-solution}
+bootstrap_samples <- fructose_measurements %>%
+    rep_sample_n(size = 3, reps = 50, replace = TRUE)
+
+head(bootstrap_samples)
+```
+
+```{r dxqjmkiirhzxgmzj-check}
+# check code
+gradethis::grade_code()
+```
+
+## Unique samples
+
+We want to know how many of these are duplicates. For each replicate I note which number is the minimum, the maximum, and in the middle.
+
+```{r dupl, exercise = T}
+bootstrap_samples_organize <- bootstrap_samples %>%
+  group_by(replicate) %>%
+  summarise(min = min(measured), middle = sort(measured)[2], max = max(measured))
+
+head(bootstrap_samples)
+```
+
+Now we can look for unique rows. 
+
+Use an R command to take out the replicate number column (since that will make every row different) and save this new dataframe as `no_replicate_column`. 
+```{r vqrkfejzwamyywci, exercise = TRUE}
+no_replicate_column <- ___ %>% 
+  ___(-___)
+```
+
+```{r vqrkfejzwamyywci-hint-1}
+no_replicate_column <- ___ %>% 
+  select(-___)
+```
+
+```{r vqrkfejzwamyywci-solution}
+no_replicate_column <- bootstrap_samples_organize %>% 
+  select(-replicate)
+
+```
+
+```{r vqrkfejzwamyywci-check}
+# check code
+gradethis::grade_code()
+```
+
+
+How many unique samples are there? Get this directly, not through `dim`.
+
+```{r jqbfofluzyjhibjn, exercise = TRUE}
+unique_samples <- no_replicate_column %>% distinct()
+
+___(unique_samples)
+```
+
+```{r jqbfofluzyjhibjn-solution}
+nrow(unique_samples)
+```
+
+```{r jqbfofluzyjhibjn-check}
+# check code
+gradethis::grade_code()
+```
+
+## Duplication
+
+Now I want to know how many times these are duplicated. 
+
+```{r dupinfo, exercise = T}
+duplicate_info <- bootstrap_samples_organize %>%
+  select(-replicate) %>%
+  group_by_all() %>%
+  summarise(count = n())
+
+head(duplicate_info)
+```
+
+What is the maximum number of duplications? The minimum? 
+
+```{r iqiihexkehxctjvj, exercise = TRUE}
+___(duplicate_info$___)
+___(duplicate_info$___)
+```
+
+
+```{r iqiihexkehxctjvj-solution}
+max(duplicate_info$count)
+min(duplicate_info$count)
+```
+
+```{r iqiihexkehxctjvj-check}
+# check code
+gradethis::grade_code()
+```
+
+
+
+
+## Submit checkpoint
+
+```{r context="server"}
+learnrhash::encoder_logic(strip_output = T)
+```
+
+```{r encode, echo=FALSE}
+learnrhash::encoder_ui(
+  ui_before = div(strong("Submit your hash in the form below."), br(), br()),
+  ui_after  = learnrhash::iframe_ui(
+    src = "https://docs.google.com/forms/d/e/1FAIpQLSda78rAQWziQ-L6eDanGoDAhcfoi6JU_dg-c-6A9rrEXdvJwg/viewform", ## change link, include name
+    width="900px", height= "1000px"
+  )
+)
+```
+
+## Creating a reproducible lab report
+
+For the rest of this lab you will R Markdown to create a reproducible lab report. 
+In RStudio, go to New File -> R Markdown... Then, choose From Template and then choose `Lab Report` from the list of templates. Make sure to name the document appropriately and pick a location for the file where you know how to find it on your computer.
+
+See the following video describing how to get started with creating these 
+reports for this lab, and all future labs:
+
+[**Basic R Markdown with an OpenIntro Lab**](https://www.youtube.com/watch?v=Pdc368lS2hk)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Pdc368lS2hk" frameborder="0" allowfullscreen></iframe>
+
+**Note: This video was made using `oilabs`. We will NOT be using `oilabs`. Be sure to pick the Lab Report template that goes with `openintro` as shown in screenshot above. Make sure you have `library(openintro)` in your first chunk not `library(oilabs)`.**
+
+## Questions for Lab Report
+
+Answer in an Rmd file based on the lab report template. Remember you will need to load appropriate packages, set a seed, and load data. 
+
+1. Based on the example in the pre-lab, explain why small data causes the bootstrap approach to break down.
+
+2. To see the impact of skewness on the effectiveness of the bootstrap skim Sections 4.4 and 4.5 in [this paper](https://arxiv.org/pdf/1411.5279.pdf). (A PDF version is also uploaded to Moodle.) By skimming, I mean do not get hung up on details you don't understand, just gloss right over them and move on. This is how I approach academic papers the first time around (try to get the main points and worry about details later). This is a formal statistics paper, and I do not expect you to understand everything (or even 50% of it).
+
+3. Give me one fact that you learned from or one question you have about Section 4.4.
+
+4. Give me one fact that you learned from or one question you have about Section 4.5.
+
+## Deliverables
+
+Make sure you have submitted your hash to the Google Form for the first part of the lab.
+
+When you are finished editing your Markdown document click the "Knit" button and choose "Knit to HTML" in the top left corner of RStudio. This will run all of your code and create a formatted document of the output. If you get an error, it means something in your Markdown file isn't right, either an error in code or some error in formatting. Call me into your breakout room, and we will troubleshoot.
+
+Submit your Markdown document and knitted file to [Moodle](https://moodle.smith.edu/) as:
+
+LastName-LastName-LastName-L-11.Rmd  (add a third last name if applicable)
+
+LastName-LastName-LastName-L-11.html
+
+*Due*: Monday (beginning of class time, Eastern time)
+
+* * *
+
+This work was created by Sara Stoudt.
+
