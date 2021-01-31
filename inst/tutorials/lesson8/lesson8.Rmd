@@ -1,0 +1,338 @@
+---
+title: "Inference for categorical data"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE,message=FALSE}
+library(learnr)
+library(learnrhash)
+library(tidyverse)
+library(gradethis)
+library(openintro)
+library(infer)
+tutorial_options(
+  # use gradethis for checking
+  exercise.checker = gradethis::grade_learnr
+  )
+knitr::opts_chunk$set(echo = FALSE)
+
+
+```
+
+## Logistics
+
+This lab will occur remotely and in groups of three. You will work with your final project team. For those of you participating synchronously, you will find the Zoom room information on [Moodle](https://moodle.smith.edu/). I will assign you to a breakout room with your partner(s) from last week. 
+
+For those participating syncronously I will be available in the main Zoom room to answer questions. If you have a question or technical problem, click the "Ask for Help" button (it looks like a question mark) in the meeting controls, and I will be alerted to join your breakout room.  
+
+For those of you participating asynchronously, alert me to technical challengs over Slack DM, and I will get back to you as soon as possible. For questions about the content of the lab, please sign up for an office hour time block. 
+
+Each of you should be writing and running code, examining output, and answering the exercises throughout the lab. However, you only need to turn in one final lab report. To be clear, everyone submits files to Moodle, but the files can be the same within a group. Today one of you should be the main recorder of answers in the lab document. You will share this document with your teammates. As you work it may be helpful to share your screen. It may be helpful to share your screen. 
+
+You all should also feel free to ask and answer questions amongst yourselves via Zoom if participating synchronously or via Slack if participating asynchronously. Please note at the end of the lab document who you consulted for help.
+
+## Getting Started
+
+The Human Freedom Index is a report that attempts to summarize the idea of "freedom"
+through a bunch of different variables for many countries around the globe.
+It serves as a rough objective measure for the relationships between the different
+types of freedom - whether it's political, religious, economical or personal freedom -
+and other social and economic circumstances. The Human Freedom Index is an annually
+co-published report by the Cato Institute, the Fraser Institute, and the Liberales
+Institut at the Friedrich Naumann Foundation for Freedom.
+
+In this lab, you'll be analyzing data from Human Freedom Index reports from 2008-2016.
+Your aim will be to summarize a few of the relationships within the data both 
+graphically and numerically in order to find which variables can help tell a story
+about freedom.
+
+### Load packages
+
+In this lab, you will explore and visualize the data using the **tidyverse** suite of 
+packages. The data can be found in the companion package for OpenIntro resources, **openintro**.
+
+Let's load the packages. 
+
+```{r load-packages, exercise = T}
+library(tidyverse)
+library(openintro)
+```
+
+
+### The data
+
+The data we're working with is in the openintro package and it's called `hfi`, 
+short for Human Freedom Index.
+
+```{r}
+data(hfi)
+```
+
+
+Plot the relationship between `pf_expression_control` (political pressures and controls on media content) and the personal freedom score, `pf_score` with `pf_expression_control` as the explanatory/predictor variable. Does the relationship look linear? 
+
+```{r nvolifwefsdohnqx, exercise = TRUE}
+ggplot(hfi, aes(x = ___, y = ___))+geom_point()
+```
+
+
+```{r nvolifwefsdohnqx-solution}
+ggplot(hfi, aes(x = pf_expression_control, y = pf_score))+geom_point()
+
+```
+
+```{r nvolifwefsdohnqx-check}
+# check code
+gradethis::grade_code()
+```
+
+If the relationship looks linear, we can quantify the strength of the
+relationship with the correlation coefficient.
+
+```{r cor, exercise = T}
+hfi %>%
+  summarise(cor(pf_expression_control, pf_score, use = "complete.obs"))
+```
+
+Here, we set the `use` argument to "complete.obs" since there are some observations of NA and we don't want those to count towards the calculation of the correlation.
+
+## The linear model
+
+It is rather cumbersome to try to get the correct least squares line, i.e. the 
+line that minimizes the sum of squared residuals, through trial and error. 
+Instead, you can use the `lm` function in R to fit the linear model (a.k.a. 
+regression line).
+
+```{r m1, exercise = T}
+m1 <- lm(pf_score ~ pf_expression_control, data = hfi)
+```
+
+The first argument in the function `lm` is a formula that takes the form 
+`y ~ x`. Here it can be read that we want to make a linear model of 
+`pf_score` as a function of `pf_expression_control`. The second argument specifies that R should look in the `hfi` data frame to find the two variables. Note `lm` can handle missing values, so we can use the full data set here.
+
+The output of `lm` is an object that contains all of the information we need 
+about the linear model that was just fit. We can access this information using 
+the summary function.
+
+```{r summary-m1-setup}
+m1 <- lm(pf_score ~ pf_expression_control, data = hfi)
+```
+
+```{r summary-m1, exercise = TRUE}
+summary(m1)
+```
+
+Let's consider this output piece by piece. First, the formula used to describe 
+the model is shown at the top. After the formula you find the five-number 
+summary of the residuals. The "Coefficients" table shown next is key; its first 
+column displays the linear model's y-intercept and the coefficient of `pf_expression_control`.
+
+With this table, we can write down the least squares regression line for the 
+linear model:
+
+\[
+  \hat{y} = 4.61707 + 0.49143 \times pf\_expression\_control
+\]
+
+One last piece of information we will discuss from the summary output is the 
+Multiple R-squared, or more simply, $R^2$. The $R^2$ value represents the 
+proportion of variability in the response variable that is explained by the 
+explanatory variable. For this model, 63.42% of the variability in personal freedom score is explained by political pressures and controls on media content.
+
+Fit a new model that uses `pf_expression_control` to predict the total human freedom score, `hf_score`. 
+
+```{r adryxdkevttxzzno, exercise = TRUE}
+new_mod <- lm(___ ~ ___, data = ___)
+summary(___)
+```
+
+```{r adryxdkevttxzzno-solution}
+new_mod <- lm(hf_score ~pf_expression_control, data = hfi)
+summary(new_mod)
+```
+
+```{r adryxdkevttxzzno-check}
+# check code
+gradethis::grade_code()
+```
+
+Using the estimates from the R output, write the equation of the regression line. 
+
+```{r regline}
+question("Using the estimates from the R output, what is the equation of the regression line?",
+    answer("hf_score_hat = 5.15 + 0.35 * pf_expression_control", correct = T),
+    answer("hf_score = 5.15 + 0.35 * pf_expression_control"),
+    answer("hf_score_hat = 0.35 + 5.15 * pf_expression_control"),
+    answer("pf_expression_control_hat = 5.15 + 0.35 * hf_score"),
+    answer("pf_expression_control_hat = 0.35 + 5.15 * hf_score"),
+    answer("pf_expression_control = 0.35 + 5.15 * hf_score"),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+
+## Prediction and prediction errors
+
+Let's create a scatterplot with the least squares line for `m1` laid on top.
+
+```{r reg-with-line, exercise = T}
+ggplot(data = hfi, aes(x = pf_expression_control, y = pf_score)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+Here, we are literally adding a layer on top of our plot. `geom_smooth` creates
+the line by fitting a linear model. It can also show us the standard error `se`
+associated with our line, but we'll suppress that for now (and talk about what it means later).
+
+This line can be used to predict $y$ at any value of $x$. When predictions are 
+made for values of $x$ that are beyond the range of the observed data, it is 
+referred to as *extrapolation* and is not usually recommended. However, 
+predictions made within the range of the data are more reliable. They're also 
+used to compute the residuals.
+
+Remember the regression line is:
+\[
+  \hat{y} = 4.61707 + 0.49143 \times pf\_expression\_control
+\]
+
+```{r predval}
+question("What is the predicted value of a country's personal freedom score for one with a 6.7 rating for `pf_expression_control`? ",
+    answer("4.62"),
+    answer("7.91", correct = T),
+    answer("31.43"),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+```{r resid}
+question("If the true personal freedom score for this observation is 8.9, what is the residual for this prediction?  ",
+    answer("0.99", correct = T),
+    answer("-0.99"),
+    answer("0"),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+
+## Model diagnostics
+
+To assess whether the linear model is reliable, we need to check for (1) 
+linearity, (2) nearly normal residuals, and (3) constant variability.
+
+**Linearity**: You already checked if the relationship between `pf_score` and 
+`pf_expression_control` is linear using a scatterplot. 
+
+</br>
+
+**Nearly normal residuals**: To check this condition, we can look at a histogram. 
+
+```{r hist-res-setup}
+m1 <- lm(pf_score ~ pf_expression_control, data = hfi)
+```
+
+
+```{r hist-res, exercise = TRUE}
+ggplot(data = m1, aes(x = .resid)) +
+  geom_histogram() +
+  xlab("Residuals")
+```
+
+
+Based on the histogram, does the nearly normal residuals condition appear to be met?
+
+</br>
+
+**Constant variability**:
+
+In class we looked at the residuals vs. the explanatory variable. A similar residual plot is a plot of the residuals vs. fitted (predicted) values. We can interpret this plot in the same way.
+
+```{r residuals-setup}
+m1 <- lm(pf_score ~ pf_expression_control, data = hfi)
+```
+
+```{r residuals, exercise = TRUE}
+ggplot(data = m1, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  xlab("Fitted values") +
+  ylab("Residuals")
+```
+
+Notice here that `m1` can also serve as a data set because stored within it are 
+the fitted values ($\hat{y}$) and the residuals. (Don't worry too much about why they have a period in their names; this is just how those variables are named in the `m1` data structure. These variables will always be named `.fitted` and `.resid` if they are `lm` objects.) Also note that we're getting 
+fancy with the code here. After creating the scatterplot on the first layer 
+(first line of code), we overlay a horizontal dashed line at $y = 0$ (to help us
+check whether residuals are distributed around 0), and we also rename the axis 
+labels to be more informative.
+
+
+Based on the residuals vs. fitted plot, does the constant variability condition appear to be met?
+
+
+## Submit checkpoint
+
+```{r context="server"}
+learnrhash::encoder_logic(strip_output = T)
+```
+
+```{r encode, echo=FALSE}
+learnrhash::encoder_ui(
+  ui_before = div(strong("Submit your hash in the form below."), br(), br()),
+  ui_after  = learnrhash::iframe_ui(
+    src = "https://docs.google.com/forms/d/e/1FAIpQLSda78rAQWziQ-L6eDanGoDAhcfoi6JU_dg-c-6A9rrEXdvJwg/viewform", ## change link, include name
+    width="900px", height= "1000px"
+  )
+)
+```
+
+## Creating a reproducible lab report
+
+For the rest of this lab you will R Markdown to create a reproducible lab report. 
+In RStudio, go to New File -> R Markdown... Then, choose From Template and then choose `Lab Report` from the list of templates. Make sure to name the document appropriately and pick a location for the file where you know how to find it on your computer.
+
+See the following video describing how to get started with creating these 
+reports for this lab, and all future labs:
+
+[**Basic R Markdown with an OpenIntro Lab**](https://www.youtube.com/watch?v=Pdc368lS2hk)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Pdc368lS2hk" frameborder="0" allowfullscreen></iframe>
+
+**Note: This video was made using `oilabs`. We will NOT be using `oilabs`. Be sure to pick the Lab Report template that goes with `openintro` as shown in screenshot above. Make sure you have `library(openintro)` in your first chunk not `library(oilabs)`.**
+
+## Questions for Lab Report
+
+Answer in an Rmd file based on the lab report template. Remember you will need to load appropriate packages, set a seed, and load data. For this lab report you will work on the dataset you have chosen for your project. 
+
+1. Read in your data file. Remember that you need to put the csv file in the same folder as your lab Rmd file for the lab report to knit.
+
+2. Fit two linear regressions: one with your quantitative response variable as a function of your quantitative explanatory variable and one with your quantitative response variable as a function of your qualitative explanatory variable.
+
+3. Write the regression equations and interpret the slopes in the context of the relationship between the two variables. Remember to be careful with your language and avoid causal words.
+
+4. Assess the three assumptions needed to assess whether the linear model is reliable (you should make 3 plots for each regression model). Are the assumptions met? Explain why or why not.
+
+## Deliverables
+
+Make sure you have submitted your hash to the Google Form for the first part of the lab.
+
+When you are finished editing your Markdown document click the "Knit" button and choose "Knit to HTML" in the top left corner of RStudio. This will run all of your code and create a formatted document of the output. If you get an error, it means something in your Markdown file isn't right, either an error in code or some error in formatting. Call me into your breakout room, and we will troubleshoot.
+
+Submit your Markdown document and knitted file to [Moodle](https://moodle.smith.edu/) as:
+
+LastName-LastName-LastName-L-08.Rmd  (add a third last name if applicable)
+
+LastName-LastName-LastName-L-08.html
+
+*Due*: Monday (beginning of class time, Eastern time)
+
+* * *
+
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a> and was adapted by Sara Stoudt.
