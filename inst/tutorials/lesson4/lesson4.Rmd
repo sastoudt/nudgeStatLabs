@@ -418,7 +418,7 @@ head(data)
 ```
 
 2. Interpret the first confidence interval in context. 
-3. What proportion cover...
+3. What proportion of the confidence intervals capture p? (Use R code not just a visual inspection of the provided plot.)
 4. Would we expect that proportion to get closer, further away, or stay roughly the same, if we had 200 students participating? Explain your answer.
 
 
