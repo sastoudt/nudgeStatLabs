@@ -1,0 +1,471 @@
+---
+title: "Inference for categorical data"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE,message=FALSE}
+library(learnr)
+library(learnrhash)
+library(tidyverse)
+library(gradethis)
+library(openintro)
+library(infer)
+tutorial_options(
+  # use gradethis for checking
+  exercise.checker = gradethis::grade_learnr
+  )
+knitr::opts_chunk$set(echo = FALSE)
+
+
+```
+
+## Logistics
+
+This lab will occur remotely and in groups of three. For those of you participating synchronously, you will find the Zoom room information on [Moodle](https://moodle.smith.edu/). I will assign you to a breakout room with your partner(s) from last week. 
+
+For those participating syncronously I will be available in the main Zoom room to answer questions. If you have a question or technical problem, click the "Ask for Help" button (it looks like a question mark) in the meeting controls, and I will be alerted to join your breakout room.  
+
+For those of you participating asynchronously, alert me to technical challengs over Slack DM, and I will get back to you as soon as possible. For questions about the content of the lab, please sign up for an office hour time block. 
+
+Each of you should be writing and running code, examining output, and answering the exercises throughout the lab. However, you only need to turn in one final lab report. To be clear, everyone submits files to Moodle, but the files can be the same within a group. Today one of you should be the main recorder of answers in the lab document. You will share this document with your teammates. As you work it may be helpful to share your screen. It may be helpful to share your screen. 
+
+You all should also feel free to ask and answer questions amongst yourselves via Zoom if participating synchronously or via Slack if participating asynchronously. Please note at the end of the lab document who you consulted for help.
+
+## Getting Started
+
+### Load packages
+
+In this lab, we will explore and visualize the data using the **tidyverse** suite of 
+packages, and perform statistical inference using **infer**. The data can be found
+in the companion package for OpenIntro resources, **openintro**.
+
+Let's load the packages.
+
+```{r load-packages, exercise = T}
+library(tidyverse)
+library(openintro)
+library(infer)
+```
+
+
+### The data
+
+You will be analyzing the same dataset as in the previous lab, where you delved 
+into a sample from the Youth Risk Behavior Surveillance System (YRBSS) survey,
+which uses data from high schoolers to help discover health patterns. The 
+dataset is called `yrbss`.
+
+```{r str, exercise = T}
+data(yrbss)
+glimpse(yrbss)
+```
+
+## Exploratory Data Analysis
+
+
+What are the counts within each category for the amount of days these students
+have texted while driving within the past 30 days?
+
+```{r qkzhcepsbzypojdz, exercise = TRUE}
+yrbss %>% 
+  ___(text_while_driving_30d) %>%
+  summarise(count = ___)
+```
+
+```{r qkzhcepsbzypojdz-solution}
+yrbss %>%
+  group_by(text_while_driving_30d) %>%
+  summarise(count = n())
+
+```
+
+```{r qkzhcepsbzypojdz-check}
+# check code
+gradethis::grade_code()
+```
+
+What is the proportion of people who never wear helmets who texted while driving every day in the past 30 days? Remember that you can use `filter` to limit the dataset to just non-helmet wearers. Here, we will name the dataset `no_helmet`. Also, it may be easier to calculate the proportion if you create a new variable that specifies whether the individual has texted every day while driving over the past 30 days or not. We will call this variable `text_ind`.
+
+```{r no-helmet, exercise = TRUE}
+no_helmet <- yrbss %>%
+  filter(helmet_12m == "never")
+
+no_helmet <- no_helmet %>%
+  mutate(text_ind = ifelse(text_while_driving_30d == "30", "yes", "no"))
+
+no_helmet %>% 
+  group_by(___) %>% 
+  summarise(prop = ___/nrow(___))
+```
+
+```{r no-helmet-solution}
+no_helmet <- yrbss %>%
+  filter(helmet_12m == "never")
+
+no_helmet <- no_helmet %>%
+  mutate(text_ind = ifelse(text_while_driving_30d == "30", "yes", "no"))
+
+no_helmet %>% 
+  group_by(text_ind) %>% 
+  summarise(prop = n()/nrow(no_helmet))
+```
+
+```{r no-helmet-check}
+# check code
+gradethis::grade_code()
+```
+
+## Inference on proportions
+
+When summarizing the YRBSS, the Centers for Disease Control and Prevention seeks 
+insight into the population *parameters*. 
+"What proportion of people in your sample reported that they have texted while 
+driving each day for the past 30 days?" with a statistic; while the question 
+"What proportion of people on earth have texted while driving each day for the 
+past 30 days?" is answered with an estimate of the parameter.
+
+The inferential tools for estimating population proportion are analogous to 
+those used for means in the last chapter: the confidence interval and the 
+hypothesis test.
+
+```{r nohelmet-text-ci-setup}
+no_helmet <- yrbss %>%
+  filter(helmet_12m == "never")
+
+no_helmet <- no_helmet %>%
+  mutate(text_ind = ifelse(text_while_driving_30d == "30", "yes", "no"))
+
+set.seed(1311213)
+```
+
+```{r nohelmet-text-ci, exercise = TRUE}
+no_helmet %>%
+  specify(response = text_ind, success = "yes") %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "prop") %>%
+  get_ci(level = 0.95)
+```
+
+Note that since the goal is to construct an interval estimate for a 
+proportion, it's necessary to both include the `success` argument within `specify`,
+which accounts for the proportion of non-helmet wearers than have consistently texted
+while driving the past 30 days, in this example, and that `stat` within `calculate`
+is here "prop", signaling that you are trying to do some sort of inference on a 
+proportion.
+
+
+
+    
+```{r MOE}
+question("What is (approximately) the margin of error for the estimate of the proportion of non-helmet 
+    wearers that have texted while driving each day for the past 30 days based on 
+    this survey? Hint: how does the margin of error relate to the width of the confidence inerval?",
+    answer("0.00625", correct = T),
+    answer("0.0125"),
+    answer("0.025"),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+
+
+## How does the proportion affect the margin of error?
+
+The margin of error is half the width of a confidence interval. Imagine you've set out to survey 1000 people in the US on two questions:  are you left-handed? are you 62 years old or over? are you at least 5 feet tall? Since these sample proportions were 
+calculated from the same sample size, they should have the same margin of 
+error, right? Actually, no! While the margin of error does change with sample size, 
+it is also affected by the true proportion.
+
+About [10% of the population](https://psyarxiv.com/5gjac/) are left-handed. [Roughly 20%](https://www.census.gov/prod/cen2010/briefs/c2010br-03.pdf) of the US population is 62 years old or over. A [rough guess-timate](https://www2.census.gov/library/publications/2010/compendia/statab/130ed/tables/11s0205.pdf) of the proportion of the US population greater than 5 feet tall is about 90%. 
+
+Let's generate some data. We'll learn more about `rbinom` later, so it's not crucial that you understand each step in following chunk.
+
+```{r binom-data, exercise = T}
+samp_hand = ifelse(rbinom(1000, 1, prob = 0.1) == 1, "left","right")
+samp_age = ifelse(rbinom(1000, 1, prob = 0.2) == 1, "old", "younger")
+samp_height = ifelse(rbinom(1000, 1, prob = 0.9) == 1, "tall", "short")
+
+samp = data.frame(samp_hand, samp_age, samp_height)
+```
+
+Let's get some confidence intervals for this data.
+
+```{r confintbinom-setup}
+samp_hand = ifelse(rbinom(1000, 1, prob = 0.1) == 1, "left","right")
+samp_age = ifelse(rbinom(1000, 1, prob = 0.2) == 1, "old", "younger")
+samp_height = ifelse(rbinom(1000, 1, prob = 0.9) == 1, "tall", "short")
+
+samp = data.frame(samp_hand, samp_age, samp_height)
+```
+
+```{r confintbinom, exercise = TRUE}
+interval_hand = samp %>% 
+  specify(response = samp_hand, success = "left") %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "prop") %>%
+  get_ci(level = 0.95)
+
+interval_age = samp %>% 
+  specify(response = samp_age, success = "old") %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "prop") %>%
+  get_ci(level = 0.95)
+
+interval_height = samp %>% 
+  specify(response = samp_height, success = "tall") %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "prop") %>%
+  get_ci(level = 0.95)
+
+```
+
+Now we can compare margins of error.
+
+```{r moecalc-setup}
+samp_hand = ifelse(rbinom(1000, 1, prob = 0.1) == 1, "left","right")
+samp_age = ifelse(rbinom(1000, 1, prob = 0.2) == 1, "old", "younger")
+samp_height = ifelse(rbinom(1000, 1, prob = 0.9) == 1, "tall", "short")
+
+samp = data.frame(samp_hand, samp_age, samp_height)
+
+interval_hand = samp %>% 
+  specify(response = samp_hand, success = "left") %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "prop") %>%
+  get_ci(level = 0.95)
+
+interval_age = samp %>% 
+  specify(response = samp_age, success = "old") %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "prop") %>%
+  get_ci(level = 0.95)
+
+interval_height = samp %>% 
+  specify(response = samp_height, success = "tall") %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "prop") %>%
+  get_ci(level = 0.95)
+```
+
+```{r moecalc, exercise = TRUE}
+(interval_hand[2]-interval_hand[1])/2
+(interval_age[2]-interval_age[1])/2
+(interval_height[2]-interval_height[1])/2
+```
+
+But what if we want to more systematically compare the relationship between proportion and margin of error? At the end of the course we'll learn a formula for standard error: $SE = \sqrt{p(1-p)/n}$. This 
+is then used in the formula for the margin of error for a 95% confidence 
+interval: 
+$$
+ME = 1.96\times SE = 1.96\times\sqrt{p(1-p)/n} \,.
+$$
+Since the population proportion $p$ is in this $ME$ formula, it should make sense
+that the margin of error is in some way dependent on the population proportion. 
+We can visualize this relationship by creating a plot of $ME$ vs. $p$.
+
+Since sample size is irrelevant to this discussion, let's just set it to
+some value ($n = 1000$) and use this value in the following calculations.
+
+The first step is to make a variable `p` that is a sequence from 0 to 1 with 
+each number incremented by 0.01. You can then create a variable of the margin of 
+error (`me`) associated with each of these values of `p` using the familiar 
+approximate formula ($ME = 2 \times SE$).
+
+```{r p-me}
+n <- 1000
+p <- seq(from = 0, to = 1, by = 0.01)
+me <- 2 * sqrt(p * (1 - p)/n)
+```
+
+Lastly, you can plot the two variables against each other to reveal their 
+relationship. To do so, we need to first put these variables in a data frame that
+you can call in the `ggplot` function.
+
+```{r me-plot-setup}
+n <- 1000
+p <- seq(from = 0, to = 1, by = 0.01)
+me <- 2 * sqrt(p * (1 - p)/n)
+```
+
+
+```{r me-plot, exercise = TRUE}
+dd <- data.frame(p = p, me = me)
+ggplot(data = dd, aes(x = p, y = me)) + 
+  geom_line() +
+  labs(x = "Population Proportion", y = "Margin of Error")
+```
+
+```{r describe}
+question("Describe the relationship between `p` and `me`.",
+    answer("The margin of error increases as p increases."),
+    answer("The margin of error decreases as p increases."),
+    answer("The margin of error increases as p increases up until a point and then decreases.", correct = T),
+     answer("The margin of error decreases as p increases up until a point and then increases."),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+```{r max}
+question("For a given sample size, for which value of `p` is margin of error maximized?",
+    answer("0"),
+    answer("0.25"),
+    answer("0.50", correct = T),
+    answer("0.75"),
+    answer("1"),
+    allow_retry = TRUE,
+    random_answer_order = F
+  )
+```
+
+
+## How do $n$ and $p$ affect the sampling distribution?
+
+You can investigate the interplay between $n$ and $p$ and the shape of the 
+sampling distribution by using simulations. The `makePlot` function will help you
+investigate how the shape, center, and spread of the distribution of
+$\hat{p}$ changes as $n$ and $p$ changes. 
+
+```{r investigate-setup}
+# Simulate sampling distribution given sample size and proportion
+# Inputs
+# n (sample size, integer)
+# p (proportion, number between 0 and 1)
+# Returns
+# plot of sampling distribution
+
+makePlot <- function(n, p) {
+
+  ## simulate data
+  pp <- data.frame(p_hat = rep(0, 5000))
+  for (i in 1:5000) {
+    samp <- sample(c(TRUE, FALSE), n,
+      replace = TRUE,
+      prob = c(p, 1 - p)
+    )
+    pp$p_hat[i] <- sum(samp == TRUE) / n
+  }
+  bw <- diff(range(pp$p_hat)) / 30
+
+  ## plot distribution
+  ggplot(data = pp, aes(x = p_hat)) +
+    geom_histogram(binwidth = bw) +
+    ggtitle(paste0("Distribution of p_hats, drawn from p = ", p, ", n = ", n))
+}
+```
+
+Consider the sampling distribution of sample proportions at $n = 300$ and $p = 0.1$. Be sure to note the center, spread, and shape.
+
+```{r investigate, exercise = T}
+# Simulate sampling distribution given sample size and proportion
+# Inputs
+# n (sample size, integer)
+# p (proportion, number between 0 and 1)
+# Returns
+# plot of sampling distribution
+
+makePlot(n = 300, p = 0.1)
+```
+
+
+
+Keep $n$ constant and change $p$ to three different values. How does the shape, center, and spread of the sampling distribution vary as $p$ changes. What happens if $p$ is very small?
+    
+```{r changep, exercise = T}
+makePlot(n = 300, p = ___)
+makePlot(n = 300, p = ___)
+makePlot(n = 300, p = ___)
+```
+    
+Now for one choice of $p$ also change $n$ to three different values. How does $n$ appear to affect the distribution of $\hat{p}$? What happens if $n$ is really small?
+
+```{r changen, exercise = T}
+makePlot(n = ___, p = 0.6)
+makePlot(n = ___, p = 0.6)
+makePlot(n = ___, p = 0.6)
+```
+
+
+## Submit checkpoint
+
+```{r context="server"}
+learnrhash::encoder_logic(strip_output = T)
+```
+
+```{r encode, echo=FALSE}
+learnrhash::encoder_ui(
+  ui_before = div(strong("Submit your hash in the form below."), br(), br()),
+  ui_after  = learnrhash::iframe_ui(
+    src = "https://docs.google.com/forms/d/e/1FAIpQLSda78rAQWziQ-L6eDanGoDAhcfoi6JU_dg-c-6A9rrEXdvJwg/viewform", ## change link, include name
+    width="900px", height= "1000px"
+  )
+)
+```
+
+## Creating a reproducible lab report
+
+For the rest of this lab you will R Markdown to create a reproducible lab report. 
+In RStudio, go to New File -> R Markdown... Then, choose From Template and then choose `Lab Report` from the list of templates. Make sure to name the document appropriately and pick a location for the file where you know how to find it on your computer.
+
+See the following video describing how to get started with creating these 
+reports for this lab, and all future labs:
+
+[**Basic R Markdown with an OpenIntro Lab**](https://www.youtube.com/watch?v=Pdc368lS2hk)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Pdc368lS2hk" frameborder="0" allowfullscreen></iframe>
+
+**Note: This video was made using `oilabs`. We will NOT be using `oilabs`. Be sure to pick the Lab Report template that goes with `openintro` as shown in screenshot above. Make sure you have `library(openintro)` in your first chunk not `library(oilabs)`.**
+
+## Questions for Lab Report
+
+Answer in an Rmd file based on the lab report template. Remember you will need to load appropriate packages, set a seed, and load data. For some of the exercises below, you will conduct inference comparing two proportions. In such cases, you have a response variable that is categorical, and an explanatory variable that is also categorical, and you are comparing the proportions of success of the response variable across the levels of the 
+explanatory variable. This means that when using `infer`, you need to include
+both variables within `specify`.
+
+1. Using the `infer` package, calculate confidence intervals for one other 
+    categorical variables in this dataset (you'll need to decide which level to call "success", and report the associated margin of error. Interpet the interval in context 
+    of the data. 
+    
+2. Is there convincing evidence that those who sleep 10+ hours per day are more
+    likely to strength train every day of the week? As always, write out the 
+    hypotheses for any tests you conduct and outline the status of the conditions
+    for inference. If you find a significant difference, also quantify this 
+    difference with a confidence interval. 
+
+3.  Let's say there has been no difference in likeliness to strength train every
+    day of the week for those who sleep 10+ hours. What is the probablity that
+    you could detect a change (at a significance level of 0.05) simply by chance?
+    *Hint:* Review the definition of the Type 1 error.
+
+4.  Suppose you're hired by the local government to estimate the proportion of 
+    residents that attend a religious service on a weekly basis. According to 
+    the guidelines, the estimate must have a margin of error no greater than 
+    1% with 95% confidence. You have no idea what to expect for $p$. How many 
+    people would you have to sample to ensure that you are within the 
+    guidelines?
+    *Hint:* Refer to your plot of the relationship between $p$ and margin of 
+    error. This question does not require using a dataset.
+
+
+
+## Deliverables
+
+Make sure you have submitted your hash to the Google Form for the first part of the lab.
+
+When you are finished editing your Markdown document click the "Knit" button and choose "Knit to HTML" in the top left corner of RStudio. This will run all of your code and create a formatted document of the output. If you get an error, it means something in your Markdown file isn't right, either an error in code or some error in formatting. Call me into your breakout room, and we will troubleshoot.
+
+Submit your Markdown document and knitted file to [Moodle](https://moodle.smith.edu/) as:
+
+LastName-LastName-LastName-L-07.Rmd  (add a third last name if applicable)
+
+LastName-LastName-LastName-L-07.html
+
+*Due*: Monday (beginning of class time, Eastern time)
+
+* * *
+
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a> and was adapted by Sara Stoudt.
