@@ -30,4 +30,17 @@ Open in a bigger screen (click the middle icon that has a window and arrow)
 
 ![](open-in-browser.png)
 
+## Available Tutorials
 
+
+- "lesson1": Exploring data
+- "lesson2": Introduction to data
+- "lesson3": Foundations for statistical inference - Sampling distributions
+- "lesson4": Foundations for statistical inference - Confidence intervals
+- "lesson5": Probability
+- "lesson6": Inference for numerical data
+- "lesson7": Inference for categorical data
+- "lesson8": Introduction to linear regression
+- "lesson9": Multiple linear regression
+- "lesson10": The normal distribution
+- "lesson11": When the bootstrap fails
