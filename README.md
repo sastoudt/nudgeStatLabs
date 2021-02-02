@@ -9,11 +9,11 @@ To install this package:
 
 2. One time only (may need to reinstall for updates throughout the semester):
 
-`devtools::install_github("sastoudt/nudgeRlabs")`
+`devtools::install_github("sastoudt/nudgeStatLabs")`
 
 3. Launch a lesson*:
 
-`learnr::run_tutorial("lesson1", "nudgeRlabs")`
+`learnr::run_tutorial("lesson1", "nudgeStatLabs")`
 
 4. Stop a lesson (click stop sign on the left, use the one on the right if *):
 
