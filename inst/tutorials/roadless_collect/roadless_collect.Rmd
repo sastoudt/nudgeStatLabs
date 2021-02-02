@@ -158,7 +158,7 @@ output$m20 <- renderLeaflet({getLocation(20)})
 learnrhash::encoder_ui(
   ui_before = div(strong("Submit your results here."), br(), br()),
   ui_after  = learnrhash::iframe_ui(
-    src = "https://docs.google.com/forms/d/e/1FAIpQLSc_sEZEQ0TCkbgHDTM16g9F9Y_v5Y2VIXsV_wL4gy3IyBNRhA/viewform", ## change link, include name
+    src = "https://docs.google.com/forms/d/e/1FAIpQLScSKRlMYQWTn6ofDCQk9kdVp9vr-74AEDnpKUFKpmQCXpDgKQ/viewform", ## change link, include name
     width="900px", height= "1000px"
   )
 )
