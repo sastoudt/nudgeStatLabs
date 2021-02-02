@@ -1,4 +1,4 @@
-# nudgeRlabs
+# nudgeStatLabs
 learnr labs for intro stat
 
 To install this package:
