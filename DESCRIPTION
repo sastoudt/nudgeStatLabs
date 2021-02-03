@@ -19,7 +19,7 @@ Imports:
     gradethis (>= 0.1.0.9002),
     openintro (>= 2.0.0),
     infer (>= 0.5.4),
-    learnr (>= 0.10.1.9007),
+    learnr (>= 0.10.1),
     learnrhash (>= 0.1.0.9000),
     mosaic,
     shiny,
