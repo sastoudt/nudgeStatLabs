@@ -26,6 +26,7 @@ Imports:
     leaflet
 Remotes: 
     rstudio-education/gradethis,
-    rundel/learnrhash
+    rundel/learnrhash,
+    rstudio/learnr
 Depends: 
     tidyverse
