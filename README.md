@@ -1,5 +1,6 @@
 # nudgeStatLabs
 ## learnr labs for intro stat
+adapted from labs for Open Intro ISRS
 
 ### To install this package:
 
@@ -11,29 +12,32 @@
 
 `devtools::install_github("sastoudt/nudgeStatLabs")`
 
-### Launch a lesson*:
+3. Thanks to Marney for this one: after install is complete (I know this seems weird, but go with it):
 
-1. `learnr::run_tutorial("lesson1", "nudgeStatLabs")`
+```unistall.pacakges("htmltools")```
+
+```install.packages("htmltools")```
+
+Exit RStudio and then open it again.
+
+#### Troubleshooting
+
+- These packages have more recent versions available. Which would you like to update? --> If the list only includes `htmltools` say No.
+
+- Do you want to install from sources the package which needs compilation? (in reference to `dplyr 1.0.3` instead of `dplyr 1.0.4`) --> No 
+
+### Launch a lesson:
+
+1. In the console (bottom left) type: `learnr::run_tutorial("lesson1", "nudgeStatLabs")`
 
 ### Stop a lesson 
 
-1. Click stop sign on the left (use the one on the right if *).
+1. Click stop sign on the left.
 
 ![](stop-tutorial.png)
 
 
-#### *If you get an error on the RStudio Server:
-
-1. Launch the lesson (go to Tutorial tab in upper right, scroll to find the nudgeRlabs tutorial, click "Start Tutorial")
-
-![](start-tutorial.png)
-
-2. Open in a bigger screen (click the middle icon that has a window and arrow)
-
-![](open-in-browser.png)
-
 ## Available Tutorials
-
 
 - "lesson1": Exploring data
 - "lesson2": Introduction to data
@@ -56,3 +60,13 @@ There will be a pre-lab and a lab report for each lab. The pre-lab will be compl
 ## How to Submit Pre-Lab
 
 ![](submit-tutorial.png)
+
+#### Troubleshooting
+
+I can't see the Google Form at the end. 
+
+Open in the browser (this should happen automatically if you use `run_tutorial` ), use Google Chrome, and make sure you are logged in to your Smith e-mail in the same browser (only Smith authenticated accounts can access the form to avoid any spam).
+
+**Run into any problems not listed above? Let me know and when we figure it out we'll add to the list.**
+
+
