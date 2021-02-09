@@ -14,7 +14,7 @@ adapted from labs for Open Intro ISRS
 
 3. Thanks to Marney for this one: after install is complete (I know this seems weird, but go with it):
 
-```unistall.pacakges("htmltools")```
+```uninstall.pacakges("htmltools")```
 
 ```install.packages("htmltools")```
 
@@ -36,6 +36,18 @@ Exit RStudio and then open it again.
 
 ![](stop-tutorial.png)
 
+#### Troubleshooting
+
+- If you get some kind of error having to do with "parse" when you try to run a tutorial:
+![](restartR.png) 
+
+Click "Session" --> "Restart R" and try to run the tutorial again. 
+
+![](restartR2.png) 
+
+- The tutorial will often pop up in a new browser tab automatically. If you have a popup blocker, you might need to turn it off or update the settings.
+
+![](popups.png) 
 
 ## Available Tutorials
 
