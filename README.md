@@ -2,6 +2,8 @@
 ## learnr labs for intro stat
 adapted from labs for Open Intro ISRS
 
+Note for Smith Students: For now, only do this on your own personal RStudio, not on the Smith server. If you only have access to the server, let me know, and I have a work around.
+
 ### To install this package:
 
 1. One time only:
@@ -10,11 +12,21 @@ adapted from labs for Open Intro ISRS
 
 2. One time only (may need to reinstall for updates throughout the semester):
 
+`library(devtools)`
+
+`remove.packages("learnr") ## might not need this if you do not have learnr pre-installed`
+
+`remotes::install_github("rstudio/learnr")`
+
+`remotes::install_github("rstudio-education/gradethis")`
+
 `devtools::install_github("sastoudt/nudgeStatLabs")`
+
+
 
 3. Thanks to Marney for this one: after install is complete (I know this seems weird, but go with it):
 
-```uninstall.pacakges("htmltools")```
+```uninstall.pacakges("htmltools") ## may not neet this if not already installed``` 
 
 ```install.packages("htmltools")```
 
