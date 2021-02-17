@@ -26,7 +26,9 @@ Note for Smith Students: For now, only do this on your own personal RStudio, not
 
 3. Thanks to Marney for this one: after install is complete (I know this seems weird, but go with it):
 
-```uninstall.pacakges("htmltools") ## may not neet this if not already installed``` 
+```uninstall.pacakges("htmltools") ## may not need this if not already installed``` 
+
+```remove.packages("learnr") ## if above gives you trouble, try this```
 
 ```install.packages("htmltools")```
 
