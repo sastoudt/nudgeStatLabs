@@ -375,6 +375,34 @@ makePlot(n = 300, p = 0.1)
 
 
 Keep $n$ constant and change $p$ to three different values. How does the shape, center, and spread of the sampling distribution vary as $p$ changes. What happens if $p$ is very small?
+
+```{r changep-setup}
+# Simulate sampling distribution given sample size and proportion
+# Inputs
+# n (sample size, integer)
+# p (proportion, number between 0 and 1)
+# Returns
+# plot of sampling distribution
+
+makePlot <- function(n, p) {
+
+  ## simulate data
+  pp <- data.frame(p_hat = rep(0, 5000))
+  for (i in 1:5000) {
+    samp <- sample(c(TRUE, FALSE), n,
+      replace = TRUE,
+      prob = c(p, 1 - p)
+    )
+    pp$p_hat[i] <- sum(samp == TRUE) / n
+  }
+  bw <- diff(range(pp$p_hat)) / 30
+
+  ## plot distribution
+  ggplot(data = pp, aes(x = p_hat)) +
+    geom_histogram(binwidth = bw) +
+    ggtitle(paste0("Distribution of p_hats, drawn from p = ", p, ", n = ", n))
+}
+```
     
 ```{r changep, exercise = T}
 makePlot(n = 300, p = ___)
@@ -383,6 +411,34 @@ makePlot(n = 300, p = ___)
 ```
     
 Now for one choice of $p$ also change $n$ to three different values. How does $n$ appear to affect the distribution of $\hat{p}$? What happens if $n$ is really small?
+
+```{r changen-setup}
+# Simulate sampling distribution given sample size and proportion
+# Inputs
+# n (sample size, integer)
+# p (proportion, number between 0 and 1)
+# Returns
+# plot of sampling distribution
+
+makePlot <- function(n, p) {
+
+  ## simulate data
+  pp <- data.frame(p_hat = rep(0, 5000))
+  for (i in 1:5000) {
+    samp <- sample(c(TRUE, FALSE), n,
+      replace = TRUE,
+      prob = c(p, 1 - p)
+    )
+    pp$p_hat[i] <- sum(samp == TRUE) / n
+  }
+  bw <- diff(range(pp$p_hat)) / 30
+
+  ## plot distribution
+  ggplot(data = pp, aes(x = p_hat)) +
+    geom_histogram(binwidth = bw) +
+    ggtitle(paste0("Distribution of p_hats, drawn from p = ", p, ", n = ", n))
+}
+```
 
 ```{r changen, exercise = T}
 makePlot(n = ___, p = 0.6)

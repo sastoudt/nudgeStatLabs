@@ -135,7 +135,7 @@ ggplot(___, aes(x = ___, y = ___, col = gender))+___
 ```
 
 ```{r wvmlhvlgkbnhonag2-solution}
-ggplot(evals, aes(x = bty_avg, y = score))+geom_point()
+ggplot(evals, aes(x = bty_avg, y = score, col = gender))+geom_point()
 ```
 
 ```{r wvmlhvlgkbnhonag2-check}

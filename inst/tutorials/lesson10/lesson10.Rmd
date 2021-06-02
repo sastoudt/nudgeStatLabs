@@ -98,8 +98,8 @@ ggplot(dairy_queen, aes(x = ___)) + ___
 ```
 
 ```{r dghqyduwvsgyzshm-solution}
-ggplot(mcdonalds, aes(x = calories)) + geom_histogram()
-ggplot(dairy_queen, aes(x = calories)) + geom_histogram()
+ggplot(mcdonalds, aes(x = cal_fat)) + geom_histogram()
+ggplot(dairy_queen, aes(x = cal_fat)) + geom_histogram()
 ```
 
 ```{r dghqyduwvsgyzshm-check}
@@ -149,7 +149,7 @@ After initializing a blank plot with `geom_blank()`, the `ggplot2` package (with
 the `tidyverse`) allows us to add additional layers. The first layer is a density 
 histogram. `..density..` is a special term that tells `ggplot` to calculate the density for the specified variable (here `cal_fat`) and use it to define the value on chosen axis. The second layer is a statistical function -- the density of the normal
 curve, `dnorm`. We specify that we want the curve to have the same mean and 
-standard deviation as the column of female heights. The argument `col` simply sets
+standard deviation as the calories from fat in the dairy queen data. The argument `col` simply sets
 the color for the line to be drawn. If we left it out, the line would be drawn in
 black.
 

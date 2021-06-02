@@ -6,13 +6,8 @@ Note for Smith Students: For now, only do this on your own personal RStudio, not
 
 ### To install this package:
 
-1. One time only:
 
-`install.packages("devtools")`
-
-2. One time only (may need to reinstall for updates throughout the semester):
-
-`library(devtools)`
+1. One time only (may need to reinstall for updates throughout the semester):
 
 `remove.packages("learnr") ## might not need this if you do not have learnr pre-installed`
 
@@ -20,15 +15,12 @@ Note for Smith Students: For now, only do this on your own personal RStudio, not
 
 `remotes::install_github("rstudio-education/gradethis")`
 
-`devtools::install_github("sastoudt/nudgeStatLabs")`
+`remotes::install_github("sastoudt/nudgeStatLabs")`
 
 
+2. Thanks to Marney for this one: after install is complete (I know this seems weird, but go with it):
 
-3. Thanks to Marney for this one: after install is complete (I know this seems weird, but go with it):
-
-```uninstall.packages("htmltools") ## may not need this if not already installed``` 
-
-```remove.packages("htmltools") ## if above gives you trouble, try this```
+```remove.packages("htmltools")```
 
 ```install.packages("htmltools")```
 

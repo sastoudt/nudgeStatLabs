@@ -284,7 +284,7 @@ sfo_june_flights <- nycflights %>% filter(dest == "SFO", month == 6)
 gradethis::grade_code()
 ```
     
-How many flights meet these criteria? **Hint:** How many rows are in `sfo_feb_flights`? To learn what a function does and its arguments that are available to you, use the "Help" tab in the bottom right. Try this for `dim` and `nrow`. 
+How many flights meet these criteria? **Hint:** How many rows are in `sfo_june_flights`? To learn what a function does and its arguments that are available to you, use the "Help" tab in the bottom right. Try this for `dim` and `nrow`. 
 
 ```{r dimflights-setup}
 sfo_june_flights <- nycflights %>% filter(dest == "SFO", month == 6)
