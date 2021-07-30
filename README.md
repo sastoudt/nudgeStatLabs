@@ -2,6 +2,8 @@
 ## learnr labs for intro stat
 adapted from labs for Open Intro ISRS
 
+**For instructors:** an overview of how I used this set of learnr labs in an intro stats class can be found [here](https://sastoudt.github.io/posts/2021-06-05-learnr-tutorials-intro-stat/).
+
 Note for Smith Students: For now, only do this on your own personal RStudio, not on the Smith server. If you only have access to the server, let me know, and I have a work around.
 
 ### To install this package:

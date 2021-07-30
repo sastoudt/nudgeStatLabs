@@ -578,7 +578,7 @@ Now, you'll try to estimate the proportion of those who think it does.
 2. Using your sample from question one, what is your best point estimate of the population proportion of people who think the work scientists do enchances their lives?
 
 3.  Change your sample size from 15 to 150, then compute the sampling 
-    distribution using the same method as above, and store these proportions in a 
+    distribution using the same method as the pre-lab, and store these proportions in a 
     new object called `sample_props150`. 
     
 4. Describe the shape of this sampling distribution and compare it to the sampling distribution for a sample size of 15. 
