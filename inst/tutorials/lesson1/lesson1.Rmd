@@ -434,7 +434,7 @@ learnrhash::encoder_logic(strip_output = T)
 learnrhash::encoder_ui(
   ui_before = div(strong("Submit your hash in the form below."), br(), br()),
   ui_after  = learnrhash::iframe_ui(
-    src = "https://docs.google.com/forms/d/e/1FAIpQLSda78rAQWziQ-L6eDanGoDAhcfoi6JU_dg-c-6A9rrEXdvJwg/viewform", ## change link, include name
+    src = "https://docs.google.com/forms/d/e/1FAIpQLSc8oEW18VdLhacNl_IiLTKIYpbFvfUqjDEv4DkiXHLr3Ll1mw/viewform", ## change link, include name
     width="900px", height= "1000px"
   )
 )
