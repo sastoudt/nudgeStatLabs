@@ -1,10 +1,11 @@
 # nudgeStatLabs
 ## learnr labs for intro stat
-adapted from labs for Open Intro ISRS
+These labs were originally adapted from labs for Open Intro ISRS by [Dr. Sara Stoudt](https://sastoudt.github.io/). 
+This repo was forked from her [original one](https://github.com/sastoudt/nudgeStatLabs)
 
-**For instructors:** an overview of how I used this set of learnr labs in an intro stats class can be found [here](https://sastoudt.github.io/posts/2021-06-05-learnr-tutorials-intro-stat/).
+**For instructors:** an overview of how Dr. Stoudt used this set of learnr labs in an intro stats class can be found [here](https://sastoudt.github.io/posts/2021-06-05-learnr-tutorials-intro-stat/).
 
-Note for Smith Students: For now, only do this on your own personal RStudio, not on the Smith server. If you only have access to the server, let me know, and I have a work around.
+Note for Smith Students: For now, only do this on your own personal RStudio, not on the Smith server. If you only have access to the server, let me know, and we will use a work around.
 
 ### To install this package:
 
@@ -17,7 +18,7 @@ Note for Smith Students: For now, only do this on your own personal RStudio, not
 
 `remotes::install_github("rstudio-education/gradethis")`
 
-`remotes::install_github("sastoudt/nudgeStatLabs")`
+`remotes::install_github("kmkinnaird/nudgeStatLabs")`
 
 
 2. Thanks to Marney for this one: after install is complete (I know this seems weird, but go with it):
@@ -74,7 +75,7 @@ Click "Session" --> "Restart R" and try to run the tutorial again.
 
 ## Lab Instructions
 
-There will be a pre-lab and a lab report for each lab. The pre-lab will be completed individually and graded for completion. This is **due by noon on Thursdays**. Then during lab you will work in a team of three to complete a lab report. If you finish early you can use the time to work on the homework due the following day.Pre-lab is submitted as a Google Form (see below). Lab report submitted to Moodle as LastName-LastName-LastName-L-LabNumber.Rmd and LastName-LastName-L-LabNumber.html The lab report is **due before class on the Monday following the lab**.
+There will be a pre-lab and a lab report for each lab. The pre-lab will be completed individually and graded for completion. This is **due by 9am on Thursdays**. Then during lab you will work in a team of three to complete a lab report. If you finish early you can use the time to work on other assignments for the course. Pre-lab is submitted as a Google Form (see below). Lab report submitted to Moodle as LastName-LastName-LastName-L-LabNumber.Rmd and LastName-LastName-L-LabNumber.html The lab report is **due on the Friday following the lab**.
 
 
 ## How to Submit Pre-Lab
