@@ -13,7 +13,10 @@ Note for Smith Students: For now, only do this on your own personal RStudio, not
 
 `install.packages("devtools")`
 
-1. One time only (may need to reinstall for updates throughout the semester). For all of these when asked which packages you would like to update, select `1: All`. If you are asked if "you want to install from sources the package which needs compilation?", please also say `Yes`
+1. One time only (may need to reinstall for updates throughout the semester). 
+
+
+For all of these when asked which packages you would like to update, select `1: All`. If you are asked if "you want to install from sources the package which needs compilation?", please also say `Yes`
 
 `remove.packages("learnr") ## might not need this if you do not have learnr pre-installed`
 
