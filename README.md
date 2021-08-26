@@ -15,9 +15,6 @@ Note for Smith Students: For now, only do this on your own personal RStudio, not
 
 1. One time only (may need to reinstall for updates throughout the semester). 
 
-
-For all of these when asked which packages you would like to update, select `1: All`. If you are asked if "you want to install from sources the package which needs compilation?", please also say `Yes`
-
 `remove.packages("learnr") ## might not need this if you do not have learnr pre-installed`
 
 `remotes::install_github("rstudio/learnr")`
@@ -40,6 +37,8 @@ Exit RStudio and then open it again.
 - These packages have more recent versions available. Which would you like to update? --> If the list only includes `htmltools` say No.
 
 - Do you want to install from sources the package which needs compilation? (in reference to `dplyr 1.0.3` instead of `dplyr 1.0.4`) --> No 
+
+- For all other situations: When asked which packages you would like to update, select `1: All`. If you are asked if "you want to install from sources the package which needs compilation?", please also say `Yes`
 
 ### Launch a lesson:
 
