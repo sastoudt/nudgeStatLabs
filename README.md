@@ -9,6 +9,9 @@ Note for Smith Students: For now, only do this on your own personal RStudio, not
 
 ### To install this package:
 
+0. One time only:
+
+`install.packages("devtools")`
 
 1. One time only (may need to reinstall for updates throughout the semester):
 
