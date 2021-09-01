@@ -80,12 +80,7 @@ Click "Session" --> "Restart R" and try to run the tutorial again.
 
 ## Lab Instructions
 
-There will be a pre-lab and a lab report for each lab. The pre-lab will be completed individually and graded for completion. This is **due by 9am on Thursdays**. Then during lab you will work in a team of three to complete a lab report. If you finish early you can use the time to work on other assignments for the course. Pre-lab is submitted as a Google Form (see below). Lab report submitted to Moodle as LastName-LastName-LastName-L-LabNumber.Rmd and LastName-LastName-L-LabNumber.html The lab report is **due on the Friday following the lab**.
-
-
-## How to Submit Pre-Lab
-
-![](submit-tutorial.png)
+There will be a pre-lab and a lab report for each lab. The pre-lab will be completed **individually** and graded for completion. This is **due by 9am on Thursdays**. Then during lab you will work in a team of three to complete a lab report. If you finish early you can use the time to work on other assignments for the course. Pre-lab is submitted as a Google Form (see below). Lab report submitted to Moodle as LastName-LastName-LastName-L-LabNumber.Rmd and LastName-LastName-L-LabNumber.html The lab report is **due on the Friday following the lab**.
 
 #### Troubleshooting
 
